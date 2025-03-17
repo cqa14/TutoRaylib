@@ -1,0 +1,13 @@
+*~
+*.o
+
+CMakeFiles/
+_deps/
+
+CMakeCache.txt
+CPackConfig.cmake
+CPackSourceConfig.cmake
+cmake_install.cmake
+Makefile
+
+TutoRaylib_Hello

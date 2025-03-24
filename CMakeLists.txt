@@ -41,3 +41,14 @@ target_link_libraries(${HELLO} PRIVATE raylib)
 target_compile_definitions(${HELLO} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
 
 ####################################################################
+# Configuration de l'exécutable pour l'exemple 1
+
+set(Exemple1 ${PROJECT_NAME}_Exemple1)
+add_executable(${Exemple1} PremierExemple/main_exemple1.cpp)
+target_sources(${Exemple1} PRIVATE ${PROJECT_SOURCES})
+target_include_directories(${Exemple1} PRIVATE ${PROJECT_INCLUDE} ${raygui_SOURCE_DIR}/src)
+target_link_libraries(${Exemple1} PRIVATE raylib)
+
+target_compile_definitions(${Exemple1} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+
+####################################################################

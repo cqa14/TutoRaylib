@@ -3,9 +3,9 @@
 #include "dessinable.h"
 #include "support_a_dessin.h"
 
-class Contenu : public Dessinable {
+class Contenu final : public Dessinable {
 public:
-  virtual ~Contenu() = default;
+  ~Contenu() override = default;
   Contenu(Contenu const&)            = default;
   Contenu& operator=(Contenu const&) = default;
   Contenu(Contenu&&)                 = default;
@@ -13,6 +13,6 @@ public:
 
   Contenu() = default;
 
-  virtual void dessine_sur(SupportADessin& support) override
+  void dessine_sur(SupportADessin& support) override
   { support.dessine(*this); }
 };

@@ -3,20 +3,16 @@
 #include <iostream>
 #include "support_a_dessin.h"
 
-class TextViewer : public SupportADessin {
+class TextViewer final : public SupportADessin {
 public:
-    TextViewer(std::ostream& flot)
-        : flot(flot) {}
+    explicit TextViewer(std::ostream& flot) : flot(flot) {}
 
-    virtual ~TextViewer() = default;
-    // on ne copie pas les TextViewer
+    ~TextViewer() override = default;
     TextViewer(TextViewer const&) = delete;
     TextViewer& operator=(TextViewer const&) = delete;
-    // mais on peut les déplacer
     TextViewer(TextViewer&&) = default;
-    TextViewer& operator=(TextViewer&&) = default;
 
-    virtual void dessine(Contenu const& a_dessiner) override;
+    void dessine(Contenu const& a_dessiner) override;
 
 private:
     std::ostream& flot;

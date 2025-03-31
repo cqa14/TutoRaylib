@@ -1,12 +1,18 @@
 #pragma once
 
 #include "support_a_dessin.h"
+#include "contenu.h"
+#include <raylib.h>
 
-class RaylibRender : public SupportADessin {
+class RaylibRender final : public SupportADessin {
 public:
     RaylibRender();
+    ~RaylibRender() override;
 
-    virtual ~RaylibRender() = default;
+    void run();
 
-    virtual void dessine(Contenu const& a_dessiner) override;
+    void dessine(Contenu const& a_dessiner) override;
+private:
+    Camera3D camera = { 0 };
+    Contenu c;
 };

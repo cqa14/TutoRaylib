@@ -67,5 +67,17 @@ target_include_directories(${Exemple2Text} PRIVATE SecondExemple/general
         SecondExemple/text)
 
 # Raylib
+set(Exemple2Raylib ${PROJECT_NAME}_Exemple2Raylib)
+add_executable(${Exemple2Raylib} SecondExemple/raylib/main_raylib.cpp
+        SecondExemple/raylib/raylib_render.cpp
+        SecondExemple/raylib/raylib_render.h
+        ${HeaderExemple2})
+target_include_directories(${Exemple2Raylib} PRIVATE SecondExemple/general
+        SecondExemple/raylib)
+target_sources(${Exemple2Raylib} PRIVATE ${PROJECT_SOURCES})
+target_include_directories(${Exemple2Raylib} PRIVATE ${PROJECT_INCLUDE} ${raygui_SOURCE_DIR}/src)
+target_link_libraries(${Exemple2Raylib} PRIVATE raylib)
+
+target_compile_definitions(${Exemple2Raylib} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
 
 ####################################################################

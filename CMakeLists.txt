@@ -52,3 +52,20 @@ target_link_libraries(${Exemple1} PRIVATE raylib)
 target_compile_definitions(${Exemple1} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
 
 ####################################################################
+# Configuration de l'exécutable pour l'exemple 2
+set(HeaderExemple2 SecondExemple/general/contenu.h
+        SecondExemple/general/dessinable.h
+        SecondExemple/general/support_a_dessin.h)
+
+# Texte
+set(Exemple2Text ${PROJECT_NAME}_Exemple2Text)
+add_executable(${Exemple2Text} SecondExemple/text/main_text.cpp
+        SecondExemple/text/text_viewer.h
+        SecondExemple/text/text_viewer.cpp
+        ${HeaderExemple2})
+target_include_directories(${Exemple2Text} PRIVATE SecondExemple/general
+        SecondExemple/text)
+
+# Raylib
+
+####################################################################

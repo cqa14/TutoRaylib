@@ -156,3 +156,55 @@ int main()
 ---
 
 ## Deuxième exemple : modularisation et dessin 3D
+
+On va maintenant modulariser notre code. Le but ici est de séparer ce que l'on veut visualiser et le contenu de celui-ci. L'idée est d'organiser le programme selon deux grand principe (dit "[design patterns](https://fr.wikipedia.org/wiki/Patron_de_conception)") :
+
+- Clairement séparer trois choses : la gestion de l'application (le `main` ou le `run`, cf. plus loin), le contenu à afficher et la façon de l'afficher (dans les différentes formes : affichage à l'écran, texte, dans un fichier, ...).
+- Et il en suit une claire distinction entre ce qui doit être affiché, et la manière de le faire sur les différents supports, celle-ci ne devant pas intérferer avec le contenu.
+
+> Dans ce qui suit, nous détaillons la démarche, mais il n'est pas nécessaire de tout comprendre dans le détail pour pouvoir bien réutiliser le code fourni. Néanmoins, une fois les connaissances nécessaires à la compréhension de celui-ci acquise, il peut toujours être intéressant de revenir sur les différents choix de conception.
+
+Nous allons séparer le code sur trois grands axes (libre au lecteur d'adapter cela à ses besoins), dans trois répertoires :
+
+### Général
+
+### Texte
+
+### Raylib
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

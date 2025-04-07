@@ -4,6 +4,11 @@
 
 void TextViewer::dessine(Contenu const&)
 {
+    /*
+     * On dessine un contenu.
+     * Ici, on n'utilise pas le contenu, mais on pourrait tout à fait
+     * (ce serait même l'utilisation normale).
+     */
     flot <<
         "+------+.   " << std::endl <<
         "|`.    | `. " << std::endl <<

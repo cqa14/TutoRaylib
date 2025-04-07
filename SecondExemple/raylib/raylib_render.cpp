@@ -5,6 +5,7 @@ RaylibRender::RaylibRender() {
      * On prépare les initialisations de la fenêtre
      * comme dans le premier exemple.
      */
+    SetConfigFlags(FLAG_WINDOW_HIGHDPI);
     InitWindow(800, 600, "Un cube");
 
     /*

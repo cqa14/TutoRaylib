@@ -3,11 +3,6 @@
 #include "dessinable.h"
 #include "support_a_dessin.h"
 
-/*
- * À des fins d'exemple, nous avons quelque peu complexifié Contenu,
- * en ajoutant une position et une couleur.
- */
-
 enum COULEUR {
     NONE,
     ROUGE,

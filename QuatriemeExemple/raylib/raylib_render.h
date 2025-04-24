@@ -16,12 +16,10 @@ public:
 private:
     Camera3D camera = { 0 };
 
-    /*
-     * Pour simplifier le code, on utilise une liste de Contenu.
-     *
-     * Note : pour un comportement polymorphique, il est tout à fait possible
-     * d'adapter le code pour utiliser une liste de pointeurs sur Contenu.
-     */
+    // Ces variables sont utilisées pour les états des événements que l'on va implémenter.
+    bool deplacement = false;
+    bool pointeur = false;
+
     std::vector<Contenu> liste_contenus = {
         Contenu(),
         Contenu({-1,1,1}, VERT),

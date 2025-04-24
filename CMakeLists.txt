@@ -81,3 +81,23 @@ target_link_libraries(${Exemple2Raylib} PRIVATE raylib)
 target_compile_definitions(${Exemple2Raylib} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
 
 ####################################################################
+# Configuration de l'exécutable pour l'exemple 3
+set(HeaderExemple3 TroisiemeExemple/general/contenu.h
+        TroisiemeExemple/general/dessinable.h
+        TroisiemeExemple/general/support_a_dessin.h)
+
+# Raylib
+set(Exemple3 ${PROJECT_NAME}_Exemple3)
+add_executable(${Exemple3} TroisiemeExemple/raylib/main_raylib.cpp
+        TroisiemeExemple/raylib/raylib_render.cpp
+        TroisiemeExemple/raylib/raylib_render.h
+        ${HeaderExemple3})
+target_include_directories(${Exemple3} PRIVATE TroisiemeExemple/general
+        TroisiemeExemple/raylib)
+target_sources(${Exemple3} PRIVATE ${PROJECT_SOURCES})
+target_include_directories(${Exemple3} PRIVATE ${PROJECT_INCLUDE} ${raygui_SOURCE_DIR}/src)
+target_link_libraries(${Exemple3} PRIVATE raylib)
+
+target_compile_definitions(${Exemple3} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+
+####################################################################

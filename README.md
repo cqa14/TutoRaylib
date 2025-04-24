@@ -444,36 +444,12 @@ Dans les codes ci-dessus, nous utilisons également les fonctions `DrawCubeWires
 
 ![ex2_img2.png](SecondExemple/ex2_img2.png)
 
+## Troisième exemple : dessin de plusieurs objets et mouvements de caméra
 
+## Quatrième exemple : interactivité (souris, clavier, boutons, ...)
 
+## Cinquième exemple : évolution en temps réel
 
+## Sixième exemple : ajout d'objets plus complexes
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+## Conclusion

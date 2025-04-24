@@ -16,17 +16,15 @@ public:
      * Le reste de la classe peut être quelconque selon les besoins.
      */
     ~Contenu() override = default;
-    Contenu(Contenu const&)            = default;
-    Contenu& operator=(Contenu const&) = default;
-    Contenu(Contenu&&)                 = default;
-    Contenu& operator=(Contenu&&)      = default;
-
+    Contenu(Contenu const &) = default;
+    Contenu &operator=(Contenu const &) = default;
+    Contenu(Contenu &&) = default;
+    Contenu &operator=(Contenu &&) = default;
     Contenu() = default;
 
     /*
      * Ceci est la méthode devant être ajoutée à toute classe
      * étendant Dessinable, afin de pouvoir être dessinée.
      */
-    void dessine_sur(SupportADessin& support) override
-    { support.dessine(*this); }
+    void dessine_sur(SupportADessin &support) override { support.dessine(*this); }
 };

@@ -168,12 +168,281 @@ Nous allons séparer le code sur trois grands axes (libre au lecteur d'adapter c
 
 ### Général
 
+D'un point de vue abstrait, nous différencierons ce qui est dessinable et les supports à dessein, comme dit en préambule. Conceptuellement, le dessinable est le plus simple, il lui suffit d'avoir une méthode permettant de le dessiner sur un support.
+
+```c++
+#pragma once
+
+class SupportADessin;
+
+class Dessinable {
+public:
+    virtual void dessine_sur(SupportADessin&) = 0;
+
+    // Mise par défaut des constructeurs, ...
+    virtual ~Dessinable() = default;
+    Dessinable(Dessinable const&) = default;
+    Dessinable& operator=(Dessinable const&) = default;
+    Dessinable(Dessinable&&) = default;
+    Dessinable& operator=(Dessinable&&) = default;
+
+    Dessinable() = default;
+};
+```
+
+Le support fournit quant à lui une méthode pour dessiner les différents contenus.
+
+```c++
+#pragma once
+
+class Contenu;
+
+class SupportADessin {
+public:
+    virtual ~SupportADessin() = default;
+    // On ne copie pas les Supports.
+    SupportADessin(SupportADessin const&) = delete;
+    SupportADessin& operator=(SupportADessin const&) = delete;
+    // Mais on peut les déplacer.
+    SupportADessin(SupportADessin&&) = default;
+    SupportADessin& operator=(SupportADessin&&) = default;
+
+    SupportADessin() = default;
+
+    virtual void dessine(Contenu const& a_dessiner) = 0;
+
+    /*
+     * Mettre ici toutes les méthodes nécessaires pour dessiner tous les
+     * objets que l'on veut dessiner. Par exemple :
+     */
+    // virtual void dessine(Nounours const& a_dessiner) = 0;
+    // virtual void dessine(Voiture const& a_dessiner) = 0;
+};
+```
+
+Maintenant, pour notre contenu, il suffit de dériver de la classe `Dessinable` et de redéfinir la méthode `dessine_sur` comme suit :
+
+```c++
+#pragma once
+
+#include "dessinable.h"
+#include "support_a_dessin.h"
+
+class Contenu : public Dessinable {
+public:
+    /*
+     * Le reste de la classe peut être quelconque selon les besoins.
+     */
+    ~Contenu() override = default;
+    Contenu(Contenu const&) = default;
+    Contenu& operator=(Contenu const&) = default;
+    Contenu(Contenu&&) = default;
+    Contenu& operator=(Contenu&&) = default;
+
+    Contenu() = default;
+
+    /*
+     * Ceci est la méthode devant être ajoutée à toute classe
+     * étendant Dessinable, afin de pouvoir être dessinée.
+     */
+    void dessine_sur(SupportADessin& support) override
+    { support.dessine(*this); }
+};
+```
+
+`dessine_sur` fait alors exactement ce que son nom indique, elle va appeler la méthode `dessine` du support, en lui passant le contenu à dessiner. 
+
+> Le fait de devoir copier cette définition de `dessine_sur`, qui est la même pour chaque `Dessinable`, peut paraitre contre intuitif (en effet, pourquoi ne pas juste la mettre dans dessinable ?). Cela est entre autre dû au fait que cette architecture, appelée "[double dispatch](https://en.wikipedia.org/wiki/Double_dispatch)", est une généralisation du polymorphisme qui n'est pas totalement prévue en C++.
+
 ### Texte
+
+Passons donc à l'utilisation de cette nouvelle abstraction pour visualiser notre contenu en mode texte, avec un `main` ressemblant à cela :
+
+```c++
+#include <iostream>
+#include "text_viewer.h"
+#include "contenu.h"
+
+int main()
+{
+  TextViewer ecran(std::cout);
+
+  Contenu c;
+  c.dessine_sur(ecran);
+
+  return 0;
+}
+```
+
+Le `TextViewer` est un support qui va afficher le contenu sur la sortie standard.
+
+```c++
+#pragma once
+
+#include <iostream>
+#include "support_a_dessin.h"
+
+class TextViewer : public SupportADessin {
+public:
+    explicit TextViewer(std::ostream& flot) : flot(flot) {}
+
+    ~TextViewer() override = default;
+    TextViewer(TextViewer const&) = delete;
+    TextViewer& operator=(TextViewer const&) = delete;
+    TextViewer(TextViewer&&) = default;
+    TextViewer& operator=(TextViewer&&) = default;
+
+    /*
+     * Il faut surcharger la méthode dessine pour dessiner le contenu.
+     * Ne pas oublier de le faire pour toutes les méthodes de dessin !
+     */
+    void dessine(Contenu const& a_dessiner) override;
+
+private:
+    std::ostream& flot;
+};
+```
+
+On peut alors implémenter la méthode `dessine` pour afficher le contenu sur la sortie standard.
+
+```c++
+#include <iostream>
+#include "text_viewer.h"
+#include "contenu.h"
+
+void TextViewer::dessine(Contenu const&)
+{
+    flot <<
+        "+------+.   " << std::endl <<
+        "|`.    | `. " << std::endl <<
+        "|  `+--+---+" << std::endl <<
+        "|   |  |   |" << std::endl <<
+        "+---+--+.  |" << std::endl <<
+        " `. |    `.|" << std::endl <<
+        "   `+------+" << std::endl;
+    // Dessin de https://www.asciiart.eu/art-and-design/geometries
+}
+```
+
+Bien entendu que dans un cas concret, nous utiliserons le contenu en paramètre afin d'afficher quelque chose de pertinent ! Maintenant, si l'on compile et exécute le `main` fournit au début, on a bien dans le terminal :
+
+```
++------+.
+|`.    | `.
+|  `+--+---+
+|   |  |   |
++---+--+.  |
+ `. |    `.|
+   `+------+
+```
 
 ### Raylib
 
+Pour l'affichage graphique, nous procéderons un peu différemment, et notre `main` ressemblera à ceci :
 
+```c++
+#include "raylib_render.h"
 
+int main()
+{
+    RaylibRender ecran;
+    ecran.run();
+}
+```
+
+Ici, nous appelons la méthode `dessine_sur` dans la méthode `run`, et nous avons le contenu qui sera un attribut de la classe `RaylibRender`.
+
+```c++
+#pragma once
+
+#include "support_a_dessin.h"
+#include "contenu.h"
+#include <raylib.h>
+
+class RaylibRender final : public SupportADessin {
+public:
+    RaylibRender();
+    ~RaylibRender() override;
+
+    void run();
+
+    void dessine(Contenu const& a_dessiner) override;
+private:
+    Camera3D camera = { 0 };
+    
+    Contenu c;
+};
+```
+
+> Notons que le contenu pourrait être remplacé par un pointeur vers un contenu pour éviter des copies.
+
+Dans cette partie, nous aborderons aussi le dessin 3D, d'où la caméra mise en attribut de cette classe. Nous allons maintenant préparer les constructeurs et destructeurs afin que nous n'ayons qu'à nous soucier de l'affichage dans la méthode `run`.
+
+```c++
+RaylibRender::RaylibRender() {
+    // parmétres de la fenêtre
+    SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+    InitWindow(800, 600, "Un cube");
+
+    // paramétres de la caméra
+    camera.position = (Vector3){ 5.0f, 5.0f, 5.0f };
+    camera.target = (Vector3){ 0.0f, 1.0f, 0.0f };
+    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+    camera.fovy = 45.0f;
+    camera.projection = CAMERA_PERSPECTIVE;
+
+    SetTargetFPS(60);
+}
+
+RaylibRender::~RaylibRender() {
+    CloseWindow();
+}
+```
+
+On notera donc que l'initialisation et la fermeture de la fenêtre sont identiques, mais on y rajoute des paramètres de caméra, comme sa position, le point qu'elle vise (`target`), le vecteur représentant la direction "haut" pour elle (`up`), son champ de vision (`fovy`) et le type de projection.
+
+On peut maintenant faire notre fonction `run` afin d'avoir un affichage fonctionnel.
+
+```c++
+void RaylibRender::run() {
+    while (!WindowShouldClose()) {
+        BeginDrawing();
+            ClearBackground(RAYWHITE);
+            BeginMode3D(camera);
+                // Afin de bien voir le cube, on va dessiner une grille.
+                DrawGrid(200, 0.5f);
+
+                // Et on dessine le contenu.
+                c.dessine_sur(*this);
+            EndMode3D();
+        EndDrawing();
+    }
+}
+```
+
+Comme dans le premier exemple, on a notre boucle d'exécution où l'on remet un fond blanc avant de dessiner. Néanmoins, nous devons maintenant entrer dans un mode 3D, avec notre caméra en argument, afin de dessiner nos objets. Il ne manque plus qu'à savoir dessiner le contenu, et cela se fait par la méthode dessine.
+
+```c++
+void RaylibRender::dessine(Contenu const& a_dessiner) {
+    Vector3 cubePosition = { 0.0f, 1.0f, 0.0f };
+    DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, LIME);
+    DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, DARKGREEN);
+}
+```
+
+Le dessin d'un cube se fait alors en appelant la fonction `DrawCube` avec en argument la position de celui-ci, sa largeur, sa hauteur, sa profondeur et sa couleur.
+
+> Notons que les fonctions de Raylib, ayant à la base été faite en C, ne prennent pas en paramètre des `vector` de C++, mais des `Vector2` / `Vector3` de Raylib, selon le nombre de composantes. Similairement, les arguments sont prévus en `float` et non en double, et certaines erreurs peuvent venir de là et sont donc réglables en forçant la conversion en float.
+
+Nous obtenons alors un affichage 3D, qui ressemble à ceci :
+
+![ex2_img.png](SecondExemple/ex2_img.png)
+
+Dans les codes ci-dessus, nous utilisons également les fonctions `DrawCubeWires` et `DrawGrid`, qui permettent respectivement de dessiner les contours du cube et une grille au sol afin de mettre en évidence les objets, mais ceci est superflus en soi.
+
+> Les objets peuvent paraitre très plat, car il n'y a pas de système de lumière par défaut, ni de méthode suffisamment simple pour le présenter ici, ce qui fait qu'il n'y a pas d'ombres par exemple.
+
+![ex2_img2.png](SecondExemple/ex2_img2.png)
 
 
 

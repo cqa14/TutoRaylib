@@ -119,3 +119,43 @@ target_include_directories(${Exemple4} PRIVATE ${PROJECT_INCLUDE} ${raygui_SOURC
 target_link_libraries(${Exemple4} PRIVATE raylib)
 
 target_compile_definitions(${Exemple4} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+
+####################################################################
+# Configuration de l'exécutable pour l'exemple 5
+set(HeaderExemple5 CinquiemeExemple/general/contenu.h
+        CinquiemeExemple/general/dessinable.h
+        CinquiemeExemple/general/support_a_dessin.h)
+
+# Raylib
+set(Exemple5 ${PROJECT_NAME}_Exemple5)
+add_executable(${Exemple5} CinquiemeExemple/raylib/main_raylib.cpp
+        CinquiemeExemple/raylib/raylib_render.cpp
+        CinquiemeExemple/raylib/raylib_render.h
+        ${HeaderExemple5})
+target_include_directories(${Exemple5} PRIVATE CinquiemeExemple/general
+        CinquiemeExemple/raylib)
+target_sources(${Exemple5} PRIVATE ${PROJECT_SOURCES})
+target_include_directories(${Exemple5} PRIVATE ${PROJECT_INCLUDE} ${raygui_SOURCE_DIR}/src)
+target_link_libraries(${Exemple5} PRIVATE raylib)
+
+target_compile_definitions(${Exemple5} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+
+####################################################################
+# Configuration de l'exécutable pour l'exemple 6
+set(HeaderExemple6 SixiemeExemple/general/contenu.h
+        SixiemeExemple/general/dessinable.h
+        SixiemeExemple/general/support_a_dessin.h)
+
+# Raylib
+set(Exemple6 ${PROJECT_NAME}_Exemple6)
+add_executable(${Exemple6} SixiemeExemple/raylib/main_raylib.cpp
+        SixiemeExemple/raylib/raylib_render.cpp
+        SixiemeExemple/raylib/raylib_render.h
+        ${HeaderExemple5})
+target_include_directories(${Exemple6} PRIVATE SixiemeExemple/general
+        SixiemeExemple/raylib)
+target_sources(${Exemple6} PRIVATE ${PROJECT_SOURCES})
+target_include_directories(${Exemple6} PRIVATE ${PROJECT_INCLUDE} ${raygui_SOURCE_DIR}/src)
+target_link_libraries(${Exemple6} PRIVATE raylib)
+
+target_compile_definitions(${Exemple6} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")

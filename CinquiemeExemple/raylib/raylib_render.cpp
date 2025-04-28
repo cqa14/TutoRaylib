@@ -3,7 +3,7 @@
 
 RaylibRender::RaylibRender() {
     SetConfigFlags(FLAG_WINDOW_HIGHDPI);
-    InitWindow(800, 600, "Un cube");
+    InitWindow(800, 600, "Toupie");
 
     camera.position = (Vector3){ 5.0f, 5.0f, 5.0f };
     camera.target = (Vector3){ 0.0f, 1.0f, 0.0f };

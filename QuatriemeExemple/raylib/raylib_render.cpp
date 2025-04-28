@@ -7,7 +7,7 @@
 
 RaylibRender::RaylibRender() {
     SetConfigFlags(FLAG_WINDOW_HIGHDPI);
-    InitWindow(800, 600, "Des cubes");
+    InitWindow(800, 600, "Interactions");
 
     camera.position = (Vector3){ 5.0f, 5.0f, 5.0f };
     camera.target = (Vector3){ 0.0f, 1.0f, 0.0f };

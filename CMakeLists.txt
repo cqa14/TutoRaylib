@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.21)
 project(TutoRaylib)
 set(CMAKE_CXX_STANDARD 20)
 
@@ -13,14 +13,14 @@ set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
     raylib
     GIT_REPOSITORY "https://github.com/raysan5/raylib.git"
-    GIT_TAG "master"
+    GIT_TAG "5.5"
     GIT_PROGRESS TRUE
 )
 
 FetchContent_Declare(
     raygui
     GIT_REPOSITORY "https://github.com/raysan5/raygui.git"
-    GIT_TAG "master"
+    GIT_TAG "4.0"
     GIT_PROGRESS TRUE
 )
 

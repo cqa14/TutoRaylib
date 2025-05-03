@@ -1,12 +1,188 @@
 # Tuto Raylib
 
-TODO: cadre/objectif (court)
+> Il existe de nombreuses autres bibliothèques permettant de créer des interfaces graphiques, comme [Qt](https://qt.io/), [GLFW](https://www.glfw.org/), [OGRE](https://www.ogre3d.org/), [wxWidgets](https://www.wxwidgets.org/), ou encore [SDL](https://www.libsdl.org/), qui ont chacunes leurs avantages et inconvénients, donc il ne faut surtout pas hésiter à regarder s'il y en a une semblant plus adaptée à un projet particulier.
+
+## Introduction
+
+Dans la vie courante, il est rare d'intéragir avec un programme directement par le terminal. Les interfaces graphiques offrent de nouvelles possibilités d'affichage ainsi qu'une expérience utilisateur plus agréable. Ce document vise à donner un aperçu de Raylib, une bibliothèque permettant de créer des interfaces graphiques en C++.
+
+> [Raylib](https://www.raylib.com) est à l'origine une bibliothèque C, pensée pour programmer des jeux vidéo à l'origine. Elle a l'avantage d'être relativement simple à utiliser, et d'avoir été portée dans de nombreux langages et sur toutes les plateformes. Son origine du C fait que certains exemples de la documentation doivent être quelque peu adaptés pour être dans un style plus proche du C++.
 
 ---
 
 ## Installation
 
-TODO (Le fetch depuis github évite l'installation en locale qui n'est pas forcément simple à faire)
+Afin de faciliter l'usage de Raylib, nous allons utiliser [CMake](https://cmake.org/), mais l'usage d'un MAKEFILE est également possible si Raylib est disponible sur le système, en ajoutant le flag `-lraylib`. Nous laisserons le soin au lecteur de regarder comment faire l'installation si cela l'intéresse ([référence d'installation sur le GitHub de Raylib](https://github.com/raysan5/raylib?tab=readme-ov-file#build-and-installation)).
+
+Avec CMake, on pourra directement installer Raylib pour le projet, ce qui permet de ne pas avoir à s'en soucier sur chaque appareil sur lequel on sera amené à travailler. Pour commencer, il faut créer un fichier `CMakeLists.txt` à la racine du projet, qui contiendra les instructions de construction pour les différents exécutables. On commence par indiquer la version minimale de CMake requise, ainsi que la version de C++ à utiliser. On peut également indiquer le nom du projet et sa version.
+
+```cmake
+cmake_minimum_required(VERSION 3.21)
+project(NOM_DU_PROJET)
+set(CMAKE_CXX_STANDARD 20)
+```
+
+Ensuite, on peut ajouter les instructions pour vérifier si Raylib est installé sur le système, et s'il ne l'est pas, de l'installer. Si l'on désire avoir accès à des boutons, on peut également ajouter l'installation de [Raygui](https://github.com/raysan5/raygui) (une autre option pour Raygui est de copier le [header](https://github.com/raysan5/raygui/blob/master/src/raygui.h) dans le projet et de le traiter comme un header classique).
+
+```cmake
+# Inspiré de https://github.com/raysan5/raylib/blob/master/projects/CMake/CMakeLists.txt
+include(FetchContent)
+set(FETCHCONTENT_QUIET FALSE)
+
+set(RAYLIB_VERSION 5.5)
+find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
+if (NOT raylib_FOUND) # If there's none, fetch and build raylib
+    FetchContent_Declare(
+            raylib
+            DOWNLOAD_EXTRACT_TIMESTAMP OFF
+            URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
+    )
+    FetchContent_GetProperties(raylib)
+    if (NOT raylib_POPULATED) # Have we downloaded raylib yet?
+        FetchContent_MakeAvailable(raylib)
+    endif ()
+endif ()
+
+# Optionnel : installation de raygui
+FetchContent_Declare(
+        raygui
+        GIT_REPOSITORY "https://github.com/raysan5/raygui.git"
+        GIT_TAG "4.0"
+        GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(raygui)
+```
+
+Considérons une structure de projet comme suit :
+
+```
+.
+├── CMakeLists.txt
+├── build
+├── QuatriemeExemple
+│   ├── general
+│   │   ├── contenu.h
+│   │   ├── dessinable.h
+│   │   └── support_a_dessin.h
+│   └── raylib
+│       ├── main_raylib.cpp
+│       ├── raylib_render.cpp
+│       └── raylib_render.h
+└── SecondExemple
+    ├── general
+    │   ├── contenu.h
+    │   ├── dessinable.h
+    │   └── support_a_dessin.h
+    ├── raylib
+    │   ├── main_raylib.cpp
+    │   ├── raylib_render.cpp
+    │   └── raylib_render.h
+    └── text
+        ├── main_text.cpp
+        ├── text_viewer.cpp
+        └── text_viewer.h
+```
+
+Le but est de montrer via le `SecondExemple` comment compiler plusieurs exécutables avec certaines parties communes (`main_raylib.cpp` et `main_text.cpp`), tandis que le `QuatriemeExemple` sert à montrer comment ajouter Raygui.
+
+On utilisera les principalement les commandes fonctions suivantes :
+
+```cmake
+# Permet la création de macros
+set(nom_de_la_macro valeur_de_la_macro)
+
+# Permet de créer un exécutable
+add_executable(nom_de_l_executable fichiers_a_compiler)
+
+# Rend accessible les fichiers des dossiers aux autres fichiers du projet
+target_include_directories(nom_de_l_executable PRIVATE nom_du_dossier)
+
+# Permet de lier les bibliothèques à l'exécutable
+target_link_libraries(nom_de_l_executable nom_de_la_bibliotheque)
+```
+
+Par exemple, pour `main_text.cpp` qui ne nécessite pas Raylib, on peut écrire :
+
+```cmake
+# Configuration de l'exécutable pour l'exemple 2
+set(HeaderExemple2 SecondExemple/general/contenu.h
+        SecondExemple/general/dessinable.h
+        SecondExemple/general/support_a_dessin.h)
+
+# Texte
+set(Exemple2Text ${PROJECT_NAME}_Exemple2Text)
+add_executable(${Exemple2Text} SecondExemple/text/main_text.cpp
+        SecondExemple/text/text_viewer.h
+        SecondExemple/text/text_viewer.cpp
+        ${HeaderExemple2})
+target_include_directories(${Exemple2Text} PRIVATE SecondExemple/general
+        SecondExemple/text)
+```
+
+Comme on aura besoin des headers aussi pour le `main_raylib.cpp`, ils ont été mis dans une variable `HeaderExemple2`, que l'on peut appeler dès que l'on en a besoin via `${HeaderExemple2}`. On a également fait une macro pour le nom de l'exécutable, qui est `Exemple2Text`, permettant que le nom de l'exécutable prenne celui du projet (via `${PROJECT_NAME}`) puis le nom de l'exemple `NOM_DU_PROJET_Exemple2Text`, mais cela peut être simplifié à volonté :
+
+```cmake
+add_executable(Exemple2Text SecondExemple/text/main_text.cpp
+        SecondExemple/text/text_viewer.h
+        SecondExemple/text/text_viewer.cpp
+        ${HeaderExemple2})
+target_include_directories(Exemple2Text PRIVATE SecondExemple/general
+        SecondExemple/text)
+```
+
+Dans cette version, le nom est tout simplement `Exemple2Text`. Le seul point important est que ce soit le même entre la fonction `add_executable` et `target_include_directories`.
+
+Si l'on veut maintenant un autre exécutable, par exemple `main_raylib.cpp` de `SecondExemple`, on peut faire de même :
+
+```cmake
+# Raylib
+set(Exemple2Raylib ${PROJECT_NAME}_Exemple2Raylib)
+add_executable(${Exemple2Raylib} SecondExemple/raylib/main_raylib.cpp
+        SecondExemple/raylib/raylib_render.cpp
+        SecondExemple/raylib/raylib_render.h
+        ${HeaderExemple2})
+target_include_directories(${Exemple2Raylib} PRIVATE SecondExemple/general
+        SecondExemple/raylib)
+target_link_libraries(${Exemple2Raylib} raylib)
+```
+
+Pour celui-ci, nous ajoutons également la bibliothèque Raylib, ce qui fait que l'on doit ajouter `target_link_libraries(${Exemple2Raylib} raylib)`.
+
+Pour ajouter Raygui à un exécutable, il suffit d'ajouter le dossier où se trouve le header à l'exécutable (`${raygui_SOURCE_DIR}/src` si installé comme suggéré) :
+
+```cmake
+# Configuration de l'exécutable pour l'exemple 4
+set(HeaderExemple4 QuatriemeExemple/general/contenu.h
+        QuatriemeExemple/general/dessinable.h
+        QuatriemeExemple/general/support_a_dessin.h)
+
+# Raylib
+set(Exemple4 ${PROJECT_NAME}_Exemple4)
+add_executable(${Exemple4} QuatriemeExemple/raylib/main_raylib.cpp
+        QuatriemeExemple/raylib/raylib_render.cpp
+        QuatriemeExemple/raylib/raylib_render.h
+        ${HeaderExemple4})
+target_include_directories(${Exemple4} PRIVATE QuatriemeExemple/general
+        QuatriemeExemple/raylib)
+target_link_libraries(${Exemple4} raylib)
+target_include_directories(${Exemple4} PRIVATE ${raygui_SOURCE_DIR}/src)
+```
+
+> On note qu'on n'a jamais explicitement lié Raygui, mais seulement indiqué le dossier où se trouve le header. Ceci est dû à deux choses :
+> 
+> - Raygui est un header unique, et il n'y a pas de bibliothèque à lier.
+> - Il n'est pas strictemment nécessaire de mettre les `.h` dans le `add_executable` tant que les dossiers de ceux-ci sont mis dans `target_include_directories`, mais cela permet de garder une certaine clarté dans le code et est utile à certains IDE pour savoir quels fichiers sont utilisés, et à CMake pour contrôler les différences suites à des modifications.
+
+Maintenant que le CMake est configuré, on peut l'utiliser pour compiler le projet. Pour cela, il faut se placer dans le dossier `build` et exécuter les commandes suivantes :
+
+```bash
+cmake ..
+cmake --build .
+```
+
+La commande `cmake ..` va générer les fichiers de construction pour le projet, et est à utiliser après chaque modification du `CMakeLists.txt`. La commande `cmake --build .` va compiler le projet et créer les exécutables. On peut compiler un seul exécutable en ajoutant le nom de celui-ci à la fin de la commande, par exemple `cmake --build . --target nom_de_l_executable`. L'intérêt d'être dans un dossier `build` est que cela garde le projet propre, en mettant tous les fichiers de construction dans le dossier `build`.
+
+> Parfois, le compilateur peut réutiliser un fichier d'une compilation précédente s'il ne détecte pas de changement dans le code. Cela peut parfois laisser une erreur pourtant réglée. Dans ce cas, supprimer les fichiers du dossier `build` et relancer la commande `cmake ..`, puis `cmake --build .` peut aider à résoudre le problème.
 
 ---
 
@@ -25,7 +201,7 @@ int main() {
 }
 ```
 
-Pour pouvoir afficher quelque chose, il faut d'abord initialiser la fenêtre. On peut le faire en utilisant la fonction `InitWindow`, qui prend en argument la largeur et la hauteur de la fenêtre, ainsi qu'un titre. Il faut ensuite faire une boucle d'affichage, qui se termine lorsque l'utilisateur ferme la fenêtre. Finalement, il ne faut pas oublier de libérer les ressources utilisées par Raylib via la fonction `CloseWindow`.
+Pour pouvoir afficher quelque chose, nous commençons par initialiser la fenêtre. On peut le faire en utilisant la fonction `InitWindow`, qui prend en argument la largeur et la hauteur de la fenêtre, ainsi qu'un titre. Il faut ensuite faire une boucle d'affichage, qui se termine lorsque l'utilisateur ferme la fenêtre. Finalement, il ne faut pas oublier de libérer les ressources utilisées par Raylib via la fonction `CloseWindow`.
 
 ```c++
 #include <raylib.h>
@@ -147,7 +323,7 @@ int main()
 }
 ```
 
-> Pour découvrir d'autres exemples et trouver de l'inspiration, vous pouvez consulter la [galerie d'exemples de Raylib](https://www.raylib.com/examples.html). Il existe également une page regroupant les [différentes fonctions de Raylib](https://www.raylib.com/cheatsheet/cheatsheet.html), mais elle est moins pratique à utiliser.
+> Pour découvrir d'autres exemples et trouver de l'inspiration, on pourra consulter la [galerie d'exemples de Raylib](https://www.raylib.com/examples.html). Il existe également une page regroupant les [différentes fonctions de Raylib](https://www.raylib.com/cheatsheet/cheatsheet.html), mais elle est moins pratique à utiliser.
 
 ---
 
@@ -440,12 +616,22 @@ Dans les codes ci-dessus, nous utilisons également les fonctions `DrawCubeWires
 
 ![ex2_img2.png](SecondExemple/ex2_img2.png)
 
+---
+
 ## Troisième exemple : dessin de plusieurs objets et mouvements de caméra
+
+---
 
 ## Quatrième exemple : interactivité (souris, clavier, boutons, ...)
 
+---
+
 ## Cinquième exemple : évolution en temps réel
 
+---
+
 ## Sixième exemple : ajout d'objets plus complexes
+
+---
 
 ## Conclusion

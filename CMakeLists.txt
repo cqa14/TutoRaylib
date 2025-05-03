@@ -3,53 +3,48 @@ project(TutoRaylib)
 set(CMAKE_CXX_STANDARD 20)
 
 ####################################################################
-# Installation de raylib et raygui
+# Installation de raylib si nécessaire
 
 include(FetchContent)
 set(FETCHCONTENT_QUIET FALSE)
-set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 
+set(RAYLIB_VERSION 5.5)
+find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
+if (NOT raylib_FOUND) # If there's none, fetch and build raylib
+    FetchContent_Declare(
+            raylib
+            DOWNLOAD_EXTRACT_TIMESTAMP OFF
+            URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
+    )
+    FetchContent_GetProperties(raylib)
+    if (NOT raylib_POPULATED) # Have we downloaded raylib yet?
+        FetchContent_MakeAvailable(raylib)
+    endif ()
+endif ()
+
+# Optionnel : installation de raygui
 FetchContent_Declare(
-    raylib
-    GIT_REPOSITORY "https://github.com/raysan5/raylib.git"
-    GIT_TAG "5.5"
-    GIT_PROGRESS TRUE
+        raygui
+        GIT_REPOSITORY "https://github.com/raysan5/raygui.git"
+        GIT_TAG "4.0"
+        GIT_PROGRESS TRUE
 )
-
-FetchContent_Declare(
-    raygui
-    GIT_REPOSITORY "https://github.com/raysan5/raygui.git"
-    GIT_TAG "4.0"
-    GIT_PROGRESS TRUE
-)
-
-FetchContent_MakeAvailable(raylib raygui)
-
-file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp")
-set(PROJECT_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/src/")
+FetchContent_MakeAvailable(raygui)
 
 ####################################################################
 # Configuration de l'exécutable pour le Hello World
 
 set(HELLO ${PROJECT_NAME}_Hello)
 add_executable(${HELLO} HelloWorld/hello.cpp)
-target_sources(${HELLO} PRIVATE ${PROJECT_SOURCES})
-target_include_directories(${HELLO} PRIVATE ${PROJECT_INCLUDE} ${raygui_SOURCE_DIR}/src)
-target_link_libraries(${HELLO} PRIVATE raylib)
-
-target_compile_definitions(${HELLO} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+target_link_libraries(${HELLO} raylib)
+target_include_directories(${HELLO} PRIVATE ${raygui_SOURCE_DIR}/src)
 
 ####################################################################
 # Configuration de l'exécutable pour l'exemple 1
 
 set(Exemple1 ${PROJECT_NAME}_Exemple1)
 add_executable(${Exemple1} PremierExemple/main_exemple1.cpp)
-target_sources(${Exemple1} PRIVATE ${PROJECT_SOURCES})
-target_include_directories(${Exemple1} PRIVATE ${PROJECT_INCLUDE} ${raygui_SOURCE_DIR}/src)
-target_link_libraries(${Exemple1} PRIVATE raylib)
-
-target_compile_definitions(${Exemple1} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+target_link_libraries(${Exemple1} raylib)
 
 ####################################################################
 # Configuration de l'exécutable pour l'exemple 2
@@ -74,11 +69,7 @@ add_executable(${Exemple2Raylib} SecondExemple/raylib/main_raylib.cpp
         ${HeaderExemple2})
 target_include_directories(${Exemple2Raylib} PRIVATE SecondExemple/general
         SecondExemple/raylib)
-target_sources(${Exemple2Raylib} PRIVATE ${PROJECT_SOURCES})
-target_include_directories(${Exemple2Raylib} PRIVATE ${PROJECT_INCLUDE} ${raygui_SOURCE_DIR}/src)
-target_link_libraries(${Exemple2Raylib} PRIVATE raylib)
-
-target_compile_definitions(${Exemple2Raylib} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+target_link_libraries(${Exemple2Raylib} raylib)
 
 ####################################################################
 # Configuration de l'exécutable pour l'exemple 3
@@ -94,11 +85,7 @@ add_executable(${Exemple3} TroisiemeExemple/raylib/main_raylib.cpp
         ${HeaderExemple3})
 target_include_directories(${Exemple3} PRIVATE TroisiemeExemple/general
         TroisiemeExemple/raylib)
-target_sources(${Exemple3} PRIVATE ${PROJECT_SOURCES})
-target_include_directories(${Exemple3} PRIVATE ${PROJECT_INCLUDE} ${raygui_SOURCE_DIR}/src)
-target_link_libraries(${Exemple3} PRIVATE raylib)
-
-target_compile_definitions(${Exemple3} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+target_link_libraries(${Exemple3} raylib)
 
 ####################################################################
 # Configuration de l'exécutable pour l'exemple 4
@@ -114,11 +101,8 @@ add_executable(${Exemple4} QuatriemeExemple/raylib/main_raylib.cpp
         ${HeaderExemple4})
 target_include_directories(${Exemple4} PRIVATE QuatriemeExemple/general
         QuatriemeExemple/raylib)
-target_sources(${Exemple4} PRIVATE ${PROJECT_SOURCES})
-target_include_directories(${Exemple4} PRIVATE ${PROJECT_INCLUDE} ${raygui_SOURCE_DIR}/src)
-target_link_libraries(${Exemple4} PRIVATE raylib)
-
-target_compile_definitions(${Exemple4} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+target_link_libraries(${Exemple4} raylib)
+target_include_directories(${Exemple4} PRIVATE ${raygui_SOURCE_DIR}/src)
 
 ####################################################################
 # Configuration de l'exécutable pour l'exemple 5
@@ -134,11 +118,7 @@ add_executable(${Exemple5} CinquiemeExemple/raylib/main_raylib.cpp
         ${HeaderExemple5})
 target_include_directories(${Exemple5} PRIVATE CinquiemeExemple/general
         CinquiemeExemple/raylib)
-target_sources(${Exemple5} PRIVATE ${PROJECT_SOURCES})
-target_include_directories(${Exemple5} PRIVATE ${PROJECT_INCLUDE} ${raygui_SOURCE_DIR}/src)
-target_link_libraries(${Exemple5} PRIVATE raylib)
-
-target_compile_definitions(${Exemple5} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+target_link_libraries(${Exemple5} raylib)
 
 ####################################################################
 # Configuration de l'exécutable pour l'exemple 6
@@ -154,8 +134,4 @@ add_executable(${Exemple6} SixiemeExemple/raylib/main_raylib.cpp
         ${HeaderExemple5})
 target_include_directories(${Exemple6} PRIVATE SixiemeExemple/general
         SixiemeExemple/raylib)
-target_sources(${Exemple6} PRIVATE ${PROJECT_SOURCES})
-target_include_directories(${Exemple6} PRIVATE ${PROJECT_INCLUDE} ${raygui_SOURCE_DIR}/src)
-target_link_libraries(${Exemple6} PRIVATE raylib)
-
-target_compile_definitions(${Exemple6} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+target_link_libraries(${Exemple6} raylib)

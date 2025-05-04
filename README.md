@@ -16,7 +16,8 @@ Afin de faciliter l'usage de Raylib, nous allons utiliser [CMake](https://cmake.
 
 Avec CMake, on pourra directement installer Raylib pour le projet, ce qui permet de ne pas avoir à s'en soucier sur chaque appareil sur lequel on sera amené à travailler. Pour commencer, il faut créer un fichier `CMakeLists.txt` à la racine du projet, qui contiendra les instructions de construction pour les différents exécutables. On commence par indiquer la version minimale de CMake requise, ainsi que la version de C++ à utiliser. On peut également indiquer le nom du projet et sa version.
 
-```cmake title="CMakeLists.txt"
+```cmake 
+# CMakeLists.txt
 cmake_minimum_required(VERSION 3.21)
 project(NOM_DU_PROJET)
 set(CMAKE_CXX_STANDARD 20)
@@ -25,6 +26,8 @@ set(CMAKE_CXX_STANDARD 20)
 Ensuite, on peut ajouter les instructions pour vérifier si Raylib est installé sur le système, et s'il ne l'est pas, de l'installer. Si l'on désire avoir accès à des boutons, on peut également ajouter l'installation de [Raygui](https://github.com/raysan5/raygui) (une autre option pour Raygui est de copier le [header](https://github.com/raysan5/raygui/blob/master/src/raygui.h) dans le projet et de le traiter comme un header classique).
 
 ```cmake
+# CMakeLists.txt
+# ...
 # Inspiré de https://github.com/raysan5/raylib/blob/master/projects/CMake/CMakeLists.txt
 include(FetchContent)
 set(FETCHCONTENT_QUIET FALSE)
@@ -106,6 +109,7 @@ target_link_libraries(nom_de_l_executable nom_de_la_bibliotheque)
 Par exemple, pour `main_text.cpp` qui ne nécessite pas Raylib, on peut écrire dans `CMakeLists.txt` dans le dossier `SecondExemple` :
 
 ```cmake
+# SecondExemple/CMakeLists.txt
 # Configuration de l'exécutable pour l'exemple 2
 set(HeaderExemple2 general/contenu.h
         general/dessinable.h
@@ -135,6 +139,8 @@ Dans cette version, le nom est tout simplement `Exemple2Text`. Le seul point imp
 Si l'on veut maintenant un autre exécutable, par exemple `main_raylib.cpp` de `SecondExemple`, on peut faire de même :
 
 ```cmake
+# SecondExemple/CMakeLists.txt
+# ...
 # Raylib
 set(Exemple2Raylib ${PROJECT_NAME}_Exemple2Raylib)
 add_executable(${Exemple2Raylib} raylib/main_raylib.cpp
@@ -150,6 +156,7 @@ Pour celui-ci, nous ajoutons également la bibliothèque Raylib, ce qui fait que
 Pour ajouter Raygui à un exécutable, il suffit d'ajouter le dossier où se trouve le header à l'exécutable (`${raygui_SOURCE_DIR}/src` si installé comme suggéré) :
 
 ```cmake
+# QuatriemeExemple/CMakeLists.txt
 # Configuration de l'exécutable pour l'exemple 4
 set(HeaderExemple4 general/contenu.h
         general/dessinable.h
@@ -174,9 +181,13 @@ target_include_directories(${Exemple4} PRIVATE ${raygui_SOURCE_DIR}/src)
 Il faut finalement indiquer au CMake principale de chercher dans les sous-dossiers pour trouver les `CMakeLists.txt` des exemples. Pour cela, il suffit d'ajouter les lignes suivantes :
 
 ```cmake
+# CMakeLists.txt
+# ...
 add_subdirectory(SecondExemple)
 add_subdirectory(QuatriemeExemple)
 ```
+
+> Il est aussi possible de faire un CMake unique pour tout le projet en mettant directement le contenu des `CMakeLists.txt` des exemples dans le CMake principal (en pensant bien à spécifier les chemins des fichiers vis-à-vis de celui-ci), mais comme pour le C++, cela peut vite devenir illisible.
 
 Maintenant que le CMake est configuré, on peut l'utiliser pour compiler le projet. Pour cela, il faut se placer dans le dossier `build` et exécuter les commandes suivantes :
 
@@ -345,6 +356,7 @@ Nous allons séparer le code sur trois grands axes (libre au lecteur d'adapter c
 D'un point de vue abstrait, nous différencierons ce qui est dessinable et les supports à dessein, comme dit en préambule. Conceptuellement, le dessinable est le plus simple, il lui suffit d'avoir une méthode permettant de le dessiner sur un support.
 
 ```c++
+// dessinable.h
 #pragma once
 
 class SupportADessin;
@@ -367,6 +379,7 @@ public:
 Le support fournit quant à lui une méthode pour dessiner les différents contenus.
 
 ```c++
+// support_a_dessin.h
 #pragma once
 
 class Contenu;
@@ -397,6 +410,7 @@ public:
 Maintenant, pour notre contenu, il suffit de dériver de la classe `Dessinable` et de redéfinir la méthode `dessine_sur` comme suit :
 
 ```c++
+// contenu.h
 #pragma once
 
 #include "dessinable.h"
@@ -433,6 +447,7 @@ public:
 Passons donc à l'utilisation de cette nouvelle abstraction pour visualiser notre contenu en mode texte, avec un `main` ressemblant à cela :
 
 ```c++
+// main_text.cpp
 #include <iostream>
 #include "text_viewer.h"
 #include "contenu.h"
@@ -451,6 +466,7 @@ int main()
 Le `TextViewer` est un support qui va afficher le contenu sur la sortie standard.
 
 ```c++
+// text_viewer.h
 #pragma once
 
 #include <iostream>
@@ -480,6 +496,7 @@ private:
 On peut alors implémenter la méthode `dessine` pour afficher le contenu sur la sortie standard.
 
 ```c++
+// text_viewer.cpp
 #include <iostream>
 #include "text_viewer.h"
 #include "contenu.h"
@@ -515,6 +532,7 @@ Bien entendu que dans un cas concret, nous utiliserons le contenu en paramètre 
 Pour l'affichage graphique, nous procéderons un peu différemment, et notre `main` ressemblera à ceci :
 
 ```c++
+// main_raylib.cpp
 #include "raylib_render.h"
 
 int main()
@@ -527,6 +545,7 @@ int main()
 Ici, nous appelons la méthode `dessine_sur` dans la méthode `run`, et nous avons le contenu qui sera un attribut de la classe `RaylibRender`.
 
 ```c++
+// raylib_render.h
 #pragma once
 
 #include "support_a_dessin.h"
@@ -553,6 +572,7 @@ private:
 Dans cette partie, nous aborderons aussi le dessin 3D, d'où la caméra mise en attribut de cette classe. Nous allons maintenant préparer les constructeurs et destructeurs afin que nous n'ayons qu'à nous soucier de l'affichage dans la méthode `run`.
 
 ```c++
+// raylib_render.cpp
 RaylibRender::RaylibRender() {
     // parmétres de la fenêtre
     SetConfigFlags(FLAG_WINDOW_HIGHDPI);

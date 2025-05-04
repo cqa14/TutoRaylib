@@ -10,13 +10,13 @@ Dans la vie courante, il est rare d'intéragir avec un programme directement par
 
 ---
 
-## Installation
+## Installation et compilation
 
 Afin de faciliter l'usage de Raylib, nous allons utiliser [CMake](https://cmake.org/), mais l'usage d'un MAKEFILE est également possible si Raylib est disponible sur le système, en ajoutant le flag `-lraylib`. Nous laisserons le soin au lecteur de regarder comment faire l'installation si cela l'intéresse ([référence d'installation sur le GitHub de Raylib](https://github.com/raysan5/raylib?tab=readme-ov-file#build-and-installation)).
 
 Avec CMake, on pourra directement installer Raylib pour le projet, ce qui permet de ne pas avoir à s'en soucier sur chaque appareil sur lequel on sera amené à travailler. Pour commencer, il faut créer un fichier `CMakeLists.txt` à la racine du projet, qui contiendra les instructions de construction pour les différents exécutables. On commence par indiquer la version minimale de CMake requise, ainsi que la version de C++ à utiliser. On peut également indiquer le nom du projet et sa version.
 
-```cmake
+```cmake title="CMakeLists.txt"
 cmake_minimum_required(VERSION 3.21)
 project(NOM_DU_PROJET)
 set(CMAKE_CXX_STANDARD 20)
@@ -60,6 +60,7 @@ Considérons une structure de projet comme suit :
 ├── CMakeLists.txt
 ├── build
 ├── QuatriemeExemple
+│   ├── CMakeLists.txt
 │   ├── general
 │   │   ├── contenu.h
 │   │   ├── dessinable.h
@@ -69,6 +70,7 @@ Considérons une structure de projet comme suit :
 │       ├── raylib_render.cpp
 │       └── raylib_render.h
 └── SecondExemple
+    ├── CMakeLists.txt
     ├── general
     │   ├── contenu.h
     │   ├── dessinable.h
@@ -101,33 +103,31 @@ target_include_directories(nom_de_l_executable PRIVATE nom_du_dossier)
 target_link_libraries(nom_de_l_executable nom_de_la_bibliotheque)
 ```
 
-Par exemple, pour `main_text.cpp` qui ne nécessite pas Raylib, on peut écrire :
+Par exemple, pour `main_text.cpp` qui ne nécessite pas Raylib, on peut écrire dans `CMakeLists.txt` dans le dossier `SecondExemple` :
 
 ```cmake
 # Configuration de l'exécutable pour l'exemple 2
-set(HeaderExemple2 SecondExemple/general/contenu.h
-        SecondExemple/general/dessinable.h
-        SecondExemple/general/support_a_dessin.h)
+set(HeaderExemple2 general/contenu.h
+        general/dessinable.h
+        general/support_a_dessin.h)
 
 # Texte
 set(Exemple2Text ${PROJECT_NAME}_Exemple2Text)
-add_executable(${Exemple2Text} SecondExemple/text/main_text.cpp
-        SecondExemple/text/text_viewer.h
-        SecondExemple/text/text_viewer.cpp
+add_executable(${Exemple2Text} text/main_text.cpp
+        text/text_viewer.h
+        text/text_viewer.cpp
         ${HeaderExemple2})
-target_include_directories(${Exemple2Text} PRIVATE SecondExemple/general
-        SecondExemple/text)
+target_include_directories(${Exemple2Text} PRIVATE general text)
 ```
 
 Comme on aura besoin des headers aussi pour le `main_raylib.cpp`, ils ont été mis dans une variable `HeaderExemple2`, que l'on peut appeler dès que l'on en a besoin via `${HeaderExemple2}`. On a également fait une macro pour le nom de l'exécutable, qui est `Exemple2Text`, permettant que le nom de l'exécutable prenne celui du projet (via `${PROJECT_NAME}`) puis le nom de l'exemple `NOM_DU_PROJET_Exemple2Text`, mais cela peut être simplifié à volonté :
 
 ```cmake
-add_executable(Exemple2Text SecondExemple/text/main_text.cpp
-        SecondExemple/text/text_viewer.h
-        SecondExemple/text/text_viewer.cpp
+add_executable(Exemple2Text text/main_text.cpp
+        text/text_viewer.h
+        text/text_viewer.cpp
         ${HeaderExemple2})
-target_include_directories(Exemple2Text PRIVATE SecondExemple/general
-        SecondExemple/text)
+target_include_directories(Exemple2Text PRIVATE general text)
 ```
 
 Dans cette version, le nom est tout simplement `Exemple2Text`. Le seul point important est que ce soit le même entre la fonction `add_executable` et `target_include_directories`.
@@ -137,12 +137,11 @@ Si l'on veut maintenant un autre exécutable, par exemple `main_raylib.cpp` de `
 ```cmake
 # Raylib
 set(Exemple2Raylib ${PROJECT_NAME}_Exemple2Raylib)
-add_executable(${Exemple2Raylib} SecondExemple/raylib/main_raylib.cpp
-        SecondExemple/raylib/raylib_render.cpp
-        SecondExemple/raylib/raylib_render.h
+add_executable(${Exemple2Raylib} raylib/main_raylib.cpp
+        raylib/raylib_render.cpp
+        raylib/raylib_render.h
         ${HeaderExemple2})
-target_include_directories(${Exemple2Raylib} PRIVATE SecondExemple/general
-        SecondExemple/raylib)
+target_include_directories(${Exemple2Raylib} PRIVATE general raylib)
 target_link_libraries(${Exemple2Raylib} raylib)
 ```
 
@@ -152,18 +151,17 @@ Pour ajouter Raygui à un exécutable, il suffit d'ajouter le dossier où se tro
 
 ```cmake
 # Configuration de l'exécutable pour l'exemple 4
-set(HeaderExemple4 QuatriemeExemple/general/contenu.h
-        QuatriemeExemple/general/dessinable.h
-        QuatriemeExemple/general/support_a_dessin.h)
+set(HeaderExemple4 general/contenu.h
+        general/dessinable.h
+        general/support_a_dessin.h)
 
 # Raylib
 set(Exemple4 ${PROJECT_NAME}_Exemple4)
-add_executable(${Exemple4} QuatriemeExemple/raylib/main_raylib.cpp
-        QuatriemeExemple/raylib/raylib_render.cpp
-        QuatriemeExemple/raylib/raylib_render.h
+add_executable(${Exemple4} raylib/main_raylib.cpp
+        raylib/raylib_render.cpp
+        raylib/raylib_render.h
         ${HeaderExemple4})
-target_include_directories(${Exemple4} PRIVATE QuatriemeExemple/general
-        QuatriemeExemple/raylib)
+target_include_directories(${Exemple4} PRIVATE general raylib)
 target_link_libraries(${Exemple4} raylib)
 target_include_directories(${Exemple4} PRIVATE ${raygui_SOURCE_DIR}/src)
 ```
@@ -172,6 +170,13 @@ target_include_directories(${Exemple4} PRIVATE ${raygui_SOURCE_DIR}/src)
 > 
 > - Raygui est un header unique, et il n'y a pas de bibliothèque à lier.
 > - Il n'est pas strictemment nécessaire de mettre les `.h` dans le `add_executable` tant que les dossiers de ceux-ci sont mis dans `target_include_directories`, mais cela permet de garder une certaine clarté dans le code et est utile à certains IDE pour savoir quels fichiers sont utilisés, et à CMake pour contrôler les différences suites à des modifications.
+
+Il faut finalement indiquer au CMake principale de chercher dans les sous-dossiers pour trouver les `CMakeLists.txt` des exemples. Pour cela, il suffit d'ajouter les lignes suivantes :
+
+```cmake
+add_subdirectory(SecondExemple)
+add_subdirectory(QuatriemeExemple)
+```
 
 Maintenant que le CMake est configuré, on peut l'utiliser pour compiler le projet. Pour cela, il faut se placer dans le dossier `build` et exécuter les commandes suivantes :
 
@@ -224,7 +229,7 @@ int main() {
 
 On peut maintenant ajouter différents éléments à afficher. Par exemple, on peut afficher un texte en utilisant la fonction `DrawText`, qui prend en argument le texte à afficher, la position du coin supérieur gauche du texte, la taille de la police et la couleur du texte.
 
-Il y a également la possibilité d'afficher des formes géométriques. Par exemple, on peut afficher un cercle via la fonction `DrawCircle`, qui prend en argument le centre du cercle, son rayon, sa couleur et sa bordure.
+Il y a également la possibilité d'afficher des formes géométriques. Par exemple, on peut afficher un cercle via la fonction `DrawCircle`, qui prend en argument le centre du cercle, son rayon, sa couleur et sa bordure ([on trouvera ici d'autres exemples de formes 2D](https://www.raylib.com/examples/shapes/loader.html?name=shapes_basic_shapes)).
 
 Il est important en règle générale de remettre la couleur de fond de la fenêtre à chaque frame, pour éviter que les éléments ne se superposent. Celà se fait via la fonction `ClearBackground`, qui prend en argument la couleur desirée.
 
@@ -255,7 +260,7 @@ int main() {
 
 ![ex1_img.png](PremierExemple/ex1_img.png)
 
-Avant de passer à la suite, nous mentionnerons encore plusieurs paramètres pouvant être utiles quant au paramétrage de la fenêtre. Par exemple, il y a un système de `flags` qui permettent de définir le comportement de la fenêtre. On peut par exemple définir si la fenêtre est redimensionnable, si elle est en plein écran, si elle est visible, etc. On peut également lui fixer une taille minimale afin que nos éléments ne soient pas trop écrasés. Il est aussi commun de fixer un nombre de frames par seconde, pour éviter que le programme ne tourne trop vite.
+Avant de passer à la suite, nous mentionnerons encore plusieurs paramètres pouvant être utiles quant au paramétrage de la fenêtre. Par exemple, il y a un système de `flags` qui permettent de définir le comportement de la fenêtre ([exemple des `flags` possibles](https://www.raylib.com/examples/core/loader.html?name=core_window_flags)). On peut par exemple définir si la fenêtre est redimensionnable, si elle est en plein écran, si elle est visible, etc. On peut également lui fixer une taille minimale afin que nos éléments ne soient pas trop écrasés. Il est aussi commun de fixer un nombre de frames par seconde, pour éviter que le programme ne tourne trop vite.
 
 ```c++
 // ###########################################################
@@ -263,9 +268,6 @@ Avant de passer à la suite, nous mentionnerons encore plusieurs paramètres pou
  * Optionnel, les "flags" permettent de définir le comportement de la fenêtre
  * par exemple le redimensionnement "FLAG_WINDOW_RESIZABLE" ou
  * l'adaptation à la résolution "FLAG_WINDOW_HIGHDPI"
- *
- * Voir l'exemple de Raylib pour plus d'informations :
- * https://www.raylib.com/examples/core/loader.html?name=core_window_flags
  */
 SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
 // ###########################################################
@@ -572,6 +574,8 @@ RaylibRender::~RaylibRender() {
 ```
 
 On notera donc que l'initialisation et la fermeture de la fenêtre sont identiques, mais on y rajoute des paramètres de caméra, comme sa position, le point qu'elle vise (`target`), le vecteur représentant la direction "haut" pour elle (`up`), son champ de vision (`fovy`) et le type de projection.
+
+> Il est aussi possible de faire [une caméra dans le cas 2D](https://www.raylib.com/examples/core/loader.html?name=core_2d_camera), mais cela ne sera pas abordé ici.
 
 On peut maintenant faire notre fonction `run` afin d'avoir un affichage fonctionnel.
 

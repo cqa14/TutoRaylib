@@ -88,24 +88,29 @@ Considérons une structure de projet comme suit :
 ├── QuatriemeExemple
 │   ├── CMakeLists.txt
 │   ├── general
+│   │   ├── CMakeLists.txt
 │   │   ├── contenu.h
 │   │   ├── dessinable.h
 │   │   └── support_a_dessin.h
 │   └── raylib
+│       ├── CMakeLists.txt
 │       ├── main_raylib.cpp
 │       ├── raylib_render.cpp
 │       └── raylib_render.h
 └── SecondExemple
     ├── CMakeLists.txt
     ├── general
+    │   ├── CMakeLists.txt
     │   ├── contenu.h
     │   ├── dessinable.h
     │   └── support_a_dessin.h
     ├── raylib
+    │   ├── CMakeLists.txt
     │   ├── main_raylib.cpp
     │   ├── raylib_render.cpp
     │   └── raylib_render.h
     └── text
+        ├── CMakeLists.txt
         ├── main_text.cpp
         ├── text_viewer.cpp
         └── text_viewer.h
@@ -129,100 +134,7 @@ target_include_directories(nom_de_l_executable PRIVATE nom_du_dossier)
 target_link_libraries(nom_de_l_executable nom_de_la_bibliotheque)
 ```
 
-Par exemple, pour `main_text.cpp` qui ne nécessite pas Raylib, on peut écrire dans `CMakeLists.txt` dans le dossier `SecondExemple` :
-
-```cmake
-# SecondExemple/CMakeLists.txt
-# Configuration de l'exécutable pour l'exemple 2
-set(HeaderExemple2 general/contenu.h
-        general/dessinable.h
-        general/support_a_dessin.h)
-
-# Texte
-set(Exemple2Text ${PROJECT_NAME}_Exemple2Text)
-add_executable(${Exemple2Text} text/main_text.cpp
-        text/text_viewer.h
-        text/text_viewer.cpp
-        ${HeaderExemple2})
-target_include_directories(${Exemple2Text} PRIVATE general text)
-```
-
-Comme on aura besoin des headers aussi pour le `main_raylib.cpp`, ils ont été mis dans une variable `HeaderExemple2`, que l'on peut appeler dès que l'on en a besoin via `${HeaderExemple2}`. On a également fait une macro pour le nom de l'exécutable, qui est `Exemple2Text`, permettant que le nom de l'exécutable prenne celui du projet (via `${PROJECT_NAME}`) puis le nom de l'exemple `NOM_DU_PROJET_Exemple2Text`, mais cela peut être simplifié à volonté :
-
-```cmake
-add_executable(Exemple2Text text/main_text.cpp
-        text/text_viewer.h
-        text/text_viewer.cpp
-        ${HeaderExemple2})
-target_include_directories(Exemple2Text PRIVATE general text)
-```
-
-Dans cette version, le nom est tout simplement `Exemple2Text`. Le seul point important est que ce soit le même entre la fonction `add_executable` et `target_include_directories`.
-
-Si l'on veut maintenant un autre exécutable, par exemple `main_raylib.cpp` de `SecondExemple`, on peut faire de même :
-
-```cmake
-# SecondExemple/CMakeLists.txt
-# ...
-# Raylib
-set(Exemple2Raylib ${PROJECT_NAME}_Exemple2Raylib)
-add_executable(${Exemple2Raylib} raylib/main_raylib.cpp
-        raylib/raylib_render.cpp
-        raylib/raylib_render.h
-        ${HeaderExemple2})
-target_include_directories(${Exemple2Raylib} PRIVATE general raylib)
-target_link_libraries(${Exemple2Raylib} raylib)
-```
-
-Pour celui-ci, nous ajoutons également la bibliothèque Raylib, ce qui fait que l'on doit ajouter `target_link_libraries(${Exemple2Raylib} raylib)`.
-
-Pour ajouter Raygui à un exécutable, il suffit d'ajouter le dossier où se trouve le header à l'exécutable (`${raygui_SOURCE_DIR}/src` si installé comme suggéré) :
-
-```cmake
-# QuatriemeExemple/CMakeLists.txt
-# Configuration de l'exécutable pour l'exemple 4
-set(HeaderExemple4 general/contenu.h
-        general/dessinable.h
-        general/support_a_dessin.h)
-
-# Raylib
-set(Exemple4 ${PROJECT_NAME}_Exemple4)
-add_executable(${Exemple4} raylib/main_raylib.cpp
-        raylib/raylib_render.cpp
-        raylib/raylib_render.h
-        ${HeaderExemple4})
-target_include_directories(${Exemple4} PRIVATE general raylib)
-target_link_libraries(${Exemple4} raylib)
-target_include_directories(${Exemple4} PRIVATE ${raygui_SOURCE_DIR}/src)
-```
-
-> On note qu'on n'a jamais explicitement lié Raygui, mais seulement indiqué le dossier où se trouve le header. Ceci est dû à deux choses :
-> 
-> - Raygui est un header unique, et il n'y a pas de bibliothèque à lier.
-> - Il n'est pas strictemment nécessaire de mettre les `.h` dans le `add_executable` tant que les dossiers de ceux-ci sont mis dans `target_include_directories`, mais cela permet de garder une certaine clarté dans le code et est utile à certains IDE pour savoir quels fichiers sont utilisés, et à CMake pour contrôler les différences suites à des modifications.
-
-Il faut finalement indiquer au CMake principale de chercher dans les sous-dossiers pour trouver les `CMakeLists.txt` des exemples. Pour cela, il suffit d'ajouter les lignes suivantes :
-
-```cmake
-# CMakeLists.txt
-# ...
-add_subdirectory(SecondExemple)
-add_subdirectory(QuatriemeExemple)
-```
-
-> Il est aussi possible de faire un CMake unique pour tout le projet en mettant directement le contenu des `CMakeLists.txt` des exemples dans le CMake principal (en pensant bien à spécifier les chemins des fichiers vis-à-vis de celui-ci), mais comme pour le C++, cela peut vite devenir illisible.
-> 
-> Une [utilisation propre](https://gitlab.com/CLIUtils/modern-cmake/-/blob/master/examples/extended-project/src/CMakeLists.txt) de CMake est encore plus complexe, donc nous nous contenterons de mentionner ici que cela existe. 
-> 
-> Finalement, il est probable qu'un `main` ait besoin de fichiers qui ne sont pas dans un sous-dossier direct. Pour ce faire, nous proposons la solution de se référer au dossier parent du projet via `${${PROJECT_NAME}_SOURCE_DIR}`. Imaginons que le QuatriemeExemple ait besoin d'un fichier dans le SecondExemple, on peut faire comme suit :
-> ```cmake
-> # QuatriemeExemple/CMakeLists.txt
-> # Configuration de l'exécutable pour l'exemple 4
-> set(HeaderExemple4 general/contenu.h
->       ${${PROJECT_NAME}_SOURCE_DIR}/SecondExemple/general/dessinable.h
->       ${${PROJECT_NAME}_SOURCE_DIR}/SecondExemple/general/support_a_dessin.h)
-> # ...
-> ```
+**TODO : refaire la partie compilation.**
 
 Maintenant que le CMake est configuré, on peut l'utiliser pour compiler le projet. Pour cela, il faut se placer dans le dossier `build` et exécuter les commandes suivantes :
 

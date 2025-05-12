@@ -1,0 +1,5 @@
+add_library(Ex2RayRender raylib_render.h raylib_render.cpp)
+target_link_libraries(Ex2RayRender raylib Ex2Dessin)
+
+add_executable(Exemple2Raylib main_raylib.cpp)
+target_link_libraries(Exemple2Raylib Ex2RayRender)

@@ -1,5 +1,4 @@
 #include "raylib_render.h"
-#include <rlgl.h>
 
 RaylibRender::RaylibRender() {
     SetConfigFlags(FLAG_WINDOW_HIGHDPI);
@@ -12,7 +11,7 @@ RaylibRender::RaylibRender() {
     camera.projection = CAMERA_PERSPECTIVE;
 
     // On doit d'abord importer le modèle
-    myModel = LoadModel("../SixiemeExemple/monkey.glb");
+    myModel = LoadModel("monkey.glb");
 
     SetTargetFPS(60);
 }

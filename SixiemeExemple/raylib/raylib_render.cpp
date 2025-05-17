@@ -11,7 +11,7 @@ RaylibRender::RaylibRender() {
     camera.projection = CAMERA_PERSPECTIVE;
 
     // On doit d'abord importer le modèle
-    myModel = LoadModel("monkey.glb");
+    myModel = LoadModel("ressources/monkey.glb");
 
     SetTargetFPS(60);
 }

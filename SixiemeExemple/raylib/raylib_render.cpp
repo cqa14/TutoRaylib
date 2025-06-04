@@ -17,6 +17,8 @@ RaylibRender::RaylibRender() {
 }
 
 RaylibRender::~RaylibRender() {
+    // On doit libérer le modèle avant de fermer la fenêtre
+    UnloadModel(myModel);
     CloseWindow();
 }
 

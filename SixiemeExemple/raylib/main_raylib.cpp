@@ -1,7 +1,7 @@
 #include "raylib_render.h"
 
 
-int main(int argc, char * argv[])
+int main()
 {
     RaylibRender ecran;
     ecran.run();

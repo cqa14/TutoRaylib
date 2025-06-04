@@ -37,13 +37,16 @@ Ce sont ces étapes qui seront détaillées dans la suite de ce document.
 
 Afin de faciliter l'usage de Raylib, nous allons utiliser [CMake](https://cmake.org/), mais l'usage d'un MAKEFILE est également possible si Raylib est disponible sur le système, en ajoutant le flag `-lraylib`. Nous laisserons le soin au lecteur de regarder comment faire l'installation si cela l'intéresse ([référence d'installation sur le GitHub de Raylib](https://github.com/raysan5/raylib?tab=readme-ov-file#build-and-installation)).
 
-Avec CMake, on pourra directement installer Raylib pour le projet, ce qui permet de ne pas avoir à s'en soucier sur chaque appareil sur lequel on sera amené à travailler. Pour commencer, il faut créer un fichier `CMakeLists.txt` à la racine du projet, qui contiendra les instructions de construction pour les différents exécutables. On commence par indiquer la version minimale de CMake requise, ainsi que la version de C++ à utiliser. On peut également indiquer le nom du projet et sa version.
+Avec CMake, on pourra directement installer Raylib pour le projet, ce qui permet de ne pas avoir à s'en soucier sur chaque appareil sur lequel on sera amené à travailler. Pour commencer, il faut créer un fichier `CMakeLists.txt` à la racine du projet, qui contiendra les instructions de construction pour les différents exécutables. On commence par indiquer la version minimale de CMake requise, ainsi que la version de C++ à utiliser. On peut également indiquer le nom du projet et sa version. Finalement, on ajoute les instructions pour définir les répertoires de sortie des exécutables et des bibliothèques afin de les retrouver facilement.
 
 ```cmake 
 # CMakeLists.txt
 cmake_minimum_required(VERSION 3.21)
 project(NOM_DU_PROJET)
 set(CMAKE_CXX_STANDARD 20)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 ```
 
 Ensuite, on peut ajouter les instructions pour vérifier si Raylib est installé sur le système, et s'il ne l'est pas, de l'installer. Si l'on désire avoir accès à des boutons, on peut également ajouter l'installation de [Raygui](https://github.com/raysan5/raygui) (une autre option pour Raygui est de copier le [header](https://github.com/raysan5/raygui/blob/master/src/raygui.h) dans le projet et de le traiter comme un header classique).
@@ -84,7 +87,6 @@ Considérons une structure de projet comme suit :
 ```
 .
 ├── CMakeLists.txt
-├── build
 ├── QuatriemeExemple
 │   ├── CMakeLists.txt
 │   ├── general
@@ -97,44 +99,76 @@ Considérons une structure de projet comme suit :
 │       ├── main_raylib.cpp
 │       ├── raylib_render.cpp
 │       └── raylib_render.h
-└── SecondExemple
+└── SixiemeExemple
     ├── CMakeLists.txt
     ├── general
     │   ├── CMakeLists.txt
     │   ├── contenu.h
     │   ├── dessinable.h
     │   └── support_a_dessin.h
-    ├── raylib
-    │   ├── CMakeLists.txt
-    │   ├── main_raylib.cpp
-    │   ├── raylib_render.cpp
-    │   └── raylib_render.h
-    └── text
+    ├── monkey.glb
+    └── raylib
         ├── CMakeLists.txt
-        ├── main_text.cpp
-        ├── text_viewer.cpp
-        └── text_viewer.h
+        ├── main_raylib.cpp
+        ├── raylib_render.cpp
+        └── raylib_render.h
 ```
 
-Le but est de montrer via le `SecondExemple` comment compiler plusieurs exécutables avec certaines parties communes (`main_raylib.cpp` et `main_text.cpp`), tandis que le `QuatriemeExemple` sert à montrer comment ajouter Raygui.
-
-On utilisera les principalement les commandes fonctions suivantes :
+Le fichier `CMakeLists.txt` traiter jusqu'à présent est celui de la racine du projet, et il faut encore lui ajouter les sous-répertoires où chercher les fichiers sources et les headers.
 
 ```cmake
-# Permet la création de macros
-set(nom_de_la_macro valeur_de_la_macro)
-
-# Permet de créer un exécutable
-add_executable(nom_de_l_executable fichiers_a_compiler)
-
-# Rend accessible les fichiers des dossiers aux autres fichiers du projet
-target_include_directories(nom_de_l_executable PRIVATE nom_du_dossier)
-
-# Permet de lier les bibliothèques à l'exécutable
-target_link_libraries(nom_de_l_executable nom_de_la_bibliotheque)
+# CMakeLists.txt
+# ...
+add_subdirectory(QuatriemeExemple)
+add_subdirectory(SixiemeExemple)
 ```
 
-**TODO : refaire la partie compilation.**
+On présente maintenant la configuration pour le quatrième et le sixième exemple, car ils présentent chacun des particularités utiles à savoir. Le quatrième, outre Raylib, il utilise aussi Raygui, et le sixième exemple utilise un modèle 3D, ce qui nécessite de le copier pour le rendre accessible au programme.
+
+Dans tous les cas, on ajoute dans chaque sous-dossier un fichier `CMakeLists.txt` qui va gérer tout ce qu'il y a dans celui-ci. Dans ceux où il n'y a pas de fichiers particuliers, par exemple dans `QuatriemeExemple`, on inclut simplement les sous-dossiers `general` et `raylib`, qui contiennent notre programme.
+
+```cmake
+# QuatriemeExemple/CMakeLists.txt
+add_subdirectory(general)
+add_subdirectory(raylib)
+```
+
+Pour le dossier `general`, on va créer une librairie avec les fichiers `contenu.h`, `dessinable.h` et `support_a_dessin.h`, qui pourra être utilisée dans le reste du projet.
+
+```cmake
+# QuatriemeExemple/general/CMakeLists.txt
+add_library(Ex4Dessin contenu.h dessinable.h support_a_dessin.h)
+set_target_properties(Ex4Dessin PROPERTIES LINKER_LANGUAGE CXX) # Car CMake ne peut pas le deviner (.h est commun à C et C++)
+target_include_directories(Ex4Dessin PUBLIC ${PROJECT_SOURCE_DIR}/QuatriemeExemple/general)
+```
+
+> Quand il n'y a que des fichiers `.h`, il faut spécifier que ce sont des fichiers C++ avec `LINKER_LANGUAGE CXX`, sinon cela fait une erreur. De plus, pour que d'autres fichiers puissent utiliser cette librairie, il faut ajouter le dossier contenant les headers avec `target_include_directories`.
+
+Dans le dossier `raylib`, on va créer une librairie qui va contenir le fichier `raylib_render.cpp` et son header, et un exécutable à partir du fichier `main_raylib.cpp`. À noter que pour la librairie, on va lier toutes les librairies que l'on utilise dans celle-ci, donc Raylib et la librairie `Ex4Dessin` que l'on vient de créer, mais on a ensuite plus besoin de s'en soucier au moment d'utiliser cette nouvelle librairie.
+
+```cmake
+# QuatriemeExemple/raylib/CMakeLists.txt
+add_library(Ex4RayRender raylib_render.h raylib_render.cpp)
+target_link_libraries(Ex4RayRender raylib Ex4Dessin)
+target_include_directories(Ex4RayRender PRIVATE ${raygui_SOURCE_DIR}/src)
+
+add_executable(Exemple4 main_raylib.cpp)
+target_link_libraries(Exemple4 Ex4RayRender)
+```
+
+> Comme Raygui est un header, il faut inclure son dossier dans la cible l'utilisant, dans ce cas `Ex4RayRender`, avec `target_include_directories`.
+
+Pour le sixième exemple, c'est identique. On ajoute juste une ligne pour copier le modèle 3D dans le dossier de sortie (`${CMAKE_BINARY_DIR}/bin` configuré au tout début de cette section), afin qu'il soit accessible au programme. 
+
+```cmake
+# SixiemeExemple/raylib/CMakeLists.txt
+add_library(Ex6RayRender raylib_render.h raylib_render.cpp)
+target_link_libraries(Ex6RayRender raylib Ex6Dessin)
+file(COPY ${PROJECT_SOURCE_DIR}/SixiemeExemple/monkey.glb DESTINATION ${CMAKE_BINARY_DIR}/bin/ressources)
+
+add_executable(Exemple6 main_raylib.cpp)
+target_link_libraries(Exemple6 Ex6RayRender)
+```
 
 Maintenant que le CMake est configuré, on peut l'utiliser pour compiler le projet. Pour cela, il faut se placer dans le dossier `build` et exécuter les commandes suivantes :
 
@@ -146,6 +180,10 @@ cmake --build .
 La commande `cmake ..` va générer les fichiers de construction pour le projet, et est à utiliser après chaque modification du `CMakeLists.txt`. La commande `cmake --build .` va compiler le projet et créer les exécutables. On peut compiler un seul exécutable en ajoutant le nom de celui-ci à la fin de la commande, par exemple `cmake --build . --target nom_de_l_executable`. L'intérêt d'être dans un dossier `build` est que cela garde le projet propre, en mettant tous les fichiers de construction dans le dossier `build`.
 
 > Parfois, le compilateur peut réutiliser un fichier d'une compilation précédente s'il ne détecte pas de changement dans le code. Cela peut parfois laisser une erreur pourtant réglée. Dans ce cas, supprimer les fichiers du dossier `build` et relancer la commande `cmake ..`, puis `cmake --build .` peut aider à résoudre le problème.
+
+Pour exécuter un des exécutables, il suffit de se placer dans le dossier `bin` générer dans celui `build` et d'exécuter la commande `./nom_de_l_executable`.
+
+> Note : la plupart des éditeurs de code permettent de définir des configurations permettant de faire ces builds et exécutions dans un dossier autre, sans devoir passer par le terminal.
 
 ---
 
@@ -573,7 +611,7 @@ void RaylibRender::dessine(Contenu const& a_dessiner) {
 }
 ```
 
-Le dessin d'un cube se fait alors en appelant la fonction `DrawCube` avec en argument la position de celui-ci, sa largeur, sa hauteur, sa profondeur et sa couleur.
+Le dessin d'un cube se fait alors en appelant la fonction `DrawCube` avec en argument la position de celui-ci, sa largeur, sa hauteur, sa profondeur et sa couleur ([on trouvera ici d'autres exemples de figures 3D](https://www.raylib.com/examples/models/loader.html?name=models_geometric_shapes)).
 
 > Notons que les fonctions de Raylib, ayant à la base été faite en C, ne prennent pas en paramètre des `vector` de C++, mais des `Vector2` / `Vector3` de Raylib, selon le nombre de composantes. Similairement, les arguments sont prévus en `float` et non en double, et certaines erreurs peuvent venir de là et sont donc réglables en forçant la conversion en float.
 
@@ -870,6 +908,30 @@ Ce qui nous donne un affichage comme suit :
 
 ### Un peu de théorie
 
+Le terme "temps réel" représente le fait que le temps (physique) qui s'écoule a une signification dans le programme. Jusqu'ici dans vos programmes, l'utilisateur pouvait attendre 1 ou 10 minutes à l'invite d'un `cin` sans que cela ne change en rien le comportement du programme. Dans un processus "temps réel", le programme continue par contre de s'exécuter, que l'utilisateur agisse ou non. Ceci permet par exemple d'animer de façon réaliste les éléments du monde que l'on représente.
+
+Considérons le cas d'une balle qu'on lâche depuis une certaine hauteur. On pourrait, comme dans l'exercice que vous avez fait au premier semestre, calculer à l'avance le temps au bout duquel la balle touchera le sol. Mais dans une simulation physique en temps réel, on voudrait avoir la position de la balle à chaque instant, par exemple pour pouvoir l'afficher.
+
+On doit donc pouvoir être capable de décrire à chaque instant la nouvelle position de la balle en fonction de la position précédente et du temps dt écoulé entre deux calculs. Ce temps est simplement le temps que l'ordinateur a mis pour calculer et afficher la dernière position.
+
+Dans une simulation numérique non temps réel, cet intervalle $dt$ est fixé à une valeur arbitraire, aussi petite que la précision de calcul voulue le nécessite (voir cours d'analyse numérique).
+
+Dans un programme "temps réel", c'est par contre la puissance de la machine qui détermine la valeur de $dt$ : plus la scène est complexe à animer et afficher, plus $dt$ sera grand, et plus la simulation sera approximative et l'animation saccadée.
+
+> NOTE : La raison pour laquelle on ne fixe pas à l'avance l'intervalle dt est qu'on a a priori aucune idée du temps que prendra le calcul (et l'affichage !) d'une image et, surtout, qu'on n'a aucune garantie que ce temps restera constant : plus il y a d'éléments à prendre en compte, plus ce temps augmentera. On s'en rend bien compte dans certains jeux vidéos : lorsqu'il y a un phénomène complexe (p.ex. une explosion) ou trop d'unités à gérer, c'est le nombre d'images par seconde qui diminue et non le temps qui se dilate.
+
+Concrètement, $dt$ est donné par l'écart entre l'image précédente et l'image actuelle, et il est calculé à chaque itération de la boucle principale du programme.
+
+La simulation est donc une boucle qui répète en permanence plusieurs étapes, parmi lesquelles :
+
+1. Calcul (ou mise à jour) : on détermine l'état suivant du système, à partir de l'état courant et du pas de temps $dt$ ; c'est dans cette phase que dans votre projet interviendront les équations de la simulation ;
+2. Affichage à l'écran (ou sur tout autre support à dessin) : on envoie les données vers la carte vidéo (ou sur cin ou dans un fichier, etc.) ;
+3. Gestion des interactions (clavier, souris).
+
+En théorie, aucun calcul concernant la simulation n'est à effectuer dans ces deux dernières phases.
+
+Enfin, lorsqu'une certaine condition d'arrêt est atteinte (p.ex. un certain délai dépassé, une précision suffisante ou un évènement particulier [p.ex. clavier]), on arrête simplement le programme.
+
 ### L'exemple
 
 Pour cet exemple, nous repartons des fichiers de [l'exemple 2](#deuxième-exemple--modularisation-et-dessin-3d), et nous modifions le Contenu afin qu'il ait un angle de rotation, un getter, ainsi qu'une méthode faisant évoluer cet angle pendant `dt` :
@@ -888,10 +950,111 @@ private:
 };
 ```
 
+On modifie alors la méthode `run` de `RaylibRender` pour faire évoluer le contenu à chaque itération de la boucle principale :
+
+```c++
+void RaylibRender::run() {
+    while (!WindowShouldClose()) {
+        const auto dt = GetFrameTime();
+        c.evolue(dt);
+
+        BeginDrawing();
+            ClearBackground(RAYWHITE);
+            BeginMode3D(camera);
+                DrawGrid(200, 0.5f);
+
+                c.dessine_sur(*this);
+            EndMode3D();
+        EndDrawing();
+    }
+}
+```
+
+On remarque que le dessin est identique au second exemple, le seul changement est que l'on récupère le temps écoulé depuis la dernière image avec `GetFrameTime`, et que l'on fait évoluer le contenu en appelant la méthode `evolue` avec ce temps.
+
+Maintenant, il faut modifier la méthode `dessine` pour prendre en compte l'angle de rotation. On va pour cela utiliser la librairie `rlgl` de Raylib, qui permet de faire des transformations sur les objets 3D par des matrices ([ci-joint](https://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/) un document lié à OpenGl sur le sujet, qui est la librairie sur laquelle est construite Raylib).
+
+```c++
+// ...
+#include <rlgl.h>
+// ...
+void RaylibRender::dessine(Contenu const& a_dessiner) {
+    Vector3 cubePosition = { 0.0f, 1.0f, 0.0f };
+    
+    rlPushMatrix();
+    rlRotatef(static_cast<float>(a_dessiner.get_angle()), 0.0f, 1.0f, 0.0f);
+    DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, LIME);
+    DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, DARKGREEN);
+    rlPopMatrix();
+}
+```
+
+> Si l'on désirait seulement mettre à jour la position du cube, il suffirait de changer son vecteur de position sans se soucier de ces transformations.
+
+Décortiquons ce qui se passe. La fonction `rlPushMatrix` commence les transformations qui seront appliquées jusqu'à l'appel de `rlPopMatrix`. On applique ensuite celles que l'on veut effectuer, ici une rotation autour de l'axe Y, avec `rlRotatef`, qui prend en paramètre l'angle de rotation (en degrés) et les coordonnées de l'axe de rotation (on trouvera [ici](https://www.raylib.com/examples/models/loader.html?name=models_rlgl_solar_system) un exemple plus complexe ainsi que d'autres possibilités offertes par `rlgl`).
+
+On devrait alors avoir :
+![ex5_img.png](CinquiemeExemple/ex5_img.png)
+
 ---
 
 ## Sixième exemple : ajout d'objets plus complexes
 
+Comme pour l'exemple précédent, nous allons repartir de l'exemple 2. Le but de cet exemple est de montrer comment ajouter un modèle 3D plus complexe, que ce soit fait via un logiciel de modélisation 3D ou en utilisant un modèle déjà existant. 
+
+> Dans notre cas, nous avons juste utilisé un modèle par défaut de [Blender](https://www.blender.org/) que l'on a texturé (il existe de nombreuses ressources en ligne pour apprendre ce logiciel si la curiosité vous y pousse, tel que ce [tutoriel](https://www.youtube.com/watch?v=B0J27sf9N1Y&list=PLjEaoINr3zgEPv5y--4MKpciLaoQYZB1Z)).
+> ![ex6_blender.png](SixiemeExemple/ex6_blender.png)
+
+Pour commencer, nous allons ajouter à notre classe `RaylibRender` un attribut pour le modèle 3D que nous allons charger :
+
+```c++
+// ...
+class RaylibRender final : public SupportADessin {
+    // ...
+private:
+    // ...
+    Model myModel{};
+};
+```
+
+Puis pour pouvoir utiliser ce modèle, nous devons le charger dans le constructeur de `RaylibRender` (et l'enlever dans le destructeur) :
+
+```c++
+RaylibRender::RaylibRender() {
+    // ...
+    myModel = LoadModel("ressources/monkey.glb");
+}
+
+RaylibRender::~RaylibRender() {
+    UnloadModel(myModel);
+    CloseWindow();
+}
+```
+
+> Si le modèle n'est pas à l'endroit, on peut utiliser  :
+> ```
+>  myModel.transform = MatrixRotateXYZ((Vector3){DEG2RAD * AngleX, DEG2RAD * AngleY, DEG2RAD * AngleZ});
+> ```
+
+Le chemin `ressources/monkey.glb` est celui que l'on a paramétré dans le CMake (voir [Installation et compilation](#installation-et-compilation)).
+
+Pour le dessiner, il suffit d'utiliser la méthode `DrawModel` de Raylib, qui prend en paramètre le modèle à dessiner, sa position, sa taille et sa couleur en cas d'absence de texture :
+
+```c++
+void RaylibRender::dessine(Contenu const& a_dessiner) {
+    Vector3 modelPosition = { 0.0f, 1.0f, 0.0f };
+    DrawModel(myModel, modelPosition, 1.0f, WHITE);
+}
+```
+
+> On trouvera [ici](https://www.raylib.com/examples/models/loader.html?name=models_loading) les différents types de modèles supportés par Raylib.
+
+Et on obtient directement (notons qu'il y a le même problème d'éclairage qu'avec le cube, ce qui fait paraitre le modèle très plat !) :
+
+![ex6_img.png](SixiemeExemple/ex6_img.png)
+
 ---
 
 ## Conclusion
+
+Ce tutoriel ne vise qu'à offrir un aperçu de ce que l'on peut faire avec Raylib, et en général avec des bibliothèques graphiques. Néanmoins, il n'est pas exhaustif et quand on ne sait pas comment faire quelque chose, il ne faut pas hésiter à chercher dans la documentation ou alors parmi les exemples. Il ne faut ainsi surtout pas hésiter à regarder les divers liens proposés au fur et à mesure de ce tutoriel, et toute autre ressource à ce sujet paraissant pertinente.

@@ -1,14 +1,14 @@
 (c) 2025 by Romain Blondel; licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
-# Tuto Raylib
-
-> Il existe de nombreuses autres bibliothèques permettant de créer des interfaces graphiques, comme [Qt](https://qt.io/), [GLFW](https://www.glfw.org/), [OGRE](https://www.ogre3d.org/), [wxWidgets](https://www.wxwidgets.org/), ou encore [SDL](https://www.libsdl.org/), qui ont chacunes leurs avantages et inconvénients, donc il ne faut surtout pas hésiter à regarder s'il y en a une semblant plus adaptée à un projet particulier.
+# Tuto raylib
 
 ## Introduction
 
-Dans la vie courante, il est rare d'intéragir avec un programme directement par le terminal. Les interfaces graphiques offrent de nouvelles possibilités d'affichage ainsi qu'une expérience utilisateur plus agréable. Ce document vise à donner un aperçu de Raylib, une bibliothèque permettant de créer des interfaces graphiques en C++.
+Dans la vie courante, il est rare d'intéragir avec un programme directement par le terminal. Les interfaces graphiques offrent de nouvelles possibilités d'affichage ainsi qu'une expérience utilisateur plus agréable. Ce document vise à donner un aperçu de [raylib](https://www.raylib.com), une bibliothèque permettant de créer des interfaces graphiques en C++.
 
-> [Raylib](https://www.raylib.com) est à l'origine une bibliothèque C, pensée pour programmer des jeux vidéo à l'origine. Elle a l'avantage d'être relativement simple à utiliser, et d'avoir été portée dans de nombreux langages et sur toutes les plateformes. Son origine du C fait que certains exemples de la documentation doivent être quelque peu adaptés pour être dans un style plus proche du C++.
+> raylib est à l'origine une bibliothèque C, pensée pour programmer des jeux vidéo. Elle a l'avantage d'être relativement simple à utiliser, et d'avoir été portée dans de nombreux langages et sur toutes les plateformes. Son origine en C fait que certains exemples de la documentation doivent être quelque peu adaptés pour être dans un style plus proche du C++.
+
+> Il existe de nombreuses autres bibliothèques permettant de créer des interfaces graphiques, comme [Qt](https://qt.io/), [GLFW](https://www.glfw.org/), [OGRE](https://www.ogre3d.org/), [wxWidgets](https://www.wxwidgets.org/), ou encore [SDL](https://www.libsdl.org/), qui ont chacunes leurs avantages et inconvénients, donc il ne faut surtout pas hésiter à regarder s'il y en a une semblant plus adaptée à un projet particulier.
 
 Le document structuré comme suit :
 
@@ -21,15 +21,18 @@ Le document structuré comme suit :
 
 ### Quelques concepts préalables
 
-Quand on utilise une bibliothèque graphique, il faut bien comprendre son comportement. Il y a celles qui utilisent une approche de dessin séquentielle, donc on dessine un objet, puis un autre, et ainsi de suite, et il y a celle évènementielle, dont Raylib fait partie. L'idée est que l'on va avoir une boucle infinie qui va attendre un évènement, et lorsque celui-ci se produit, on va le traiter. Cela peut être un clic de souris, une touche de clavier ou même un certain temps d'attente.
+Quand on utilise une bibliothèque graphique, il faut bien comprendre son comportement :
 
-Il faut donc programmer avant cette boucle toutes les fonctions qui vont être associées à ces évènements, puis initialiser tout ce qu'il faut (fenêtres de dessin, boutons, variables, ...) avant de lancer la boucle.
+- il y a celles qui utilisent une approche de dessin séquentielle : on dessine un objet, puis un autre, et ainsi de suite ;
+- et il y a celles évènementielles, dont raylib : l'idée est d'avoir une boucle infinie qui va attendre des évènements ; cela peut être un clic de souris, une touche de clavier ou même un simple délais d'attente ; lorsque qu'un évènement se produit, on le traite, puis on retourne à la boucle infinie d'attente.
 
-En général, on structure celle-ci de la manière suivante :
+Il faut donc programmer _avant_ cette boucle toutes les fonctions qui vont être associées à des évènements, puis initialiser tout ce qu'il faut (fenêtres de dessin, boutons, variables, ...) avant de lancer la boucle principale.
 
-1. Gestion des évènements,
-2. Évolution du système (évènements liés au temps, donc on peut le voir comme un cas particulier du 1.),
-3. Dessin de la nouvelle image.
+En général, on structure celle-ci de la manière suivante :
+
+1. gestion des évènements ;
+2. évolution du système (évènements liés au temps ; on peut donc le voir comme un cas particulier du 1.) ;
+3. dessin de la nouvelle image.
 
 Ce sont ces étapes qui seront détaillées dans la suite de ce document.
 
@@ -37,11 +40,13 @@ Ce sont ces étapes qui seront détaillées dans la suite de ce document.
 
 ## Installation et compilation
 
-Afin de faciliter l'usage de Raylib, nous allons utiliser [CMake](https://cmake.org/), mais l'usage d'un MAKEFILE est également possible si Raylib est disponible sur le système, en ajoutant le flag `-lraylib`. Nous laisserons le soin au lecteur de regarder comment faire l'installation si cela l'intéresse ([référence d'installation sur le GitHub de Raylib](https://github.com/raysan5/raylib?tab=readme-ov-file#build-and-installation)).
+Afin de faciliter l'usage de raylib, nous allons utiliser [CMake](https://cmake.org/) comme outil d'aide à la compilation ; mais l'usage d'un `Makefile` est également possible si raylib est déjà disponible sur le système en ajoutant le flag `-lraylib`. Nous laisserons le soin au lecteur de regarder comment faire l'installation dans ce cas là, si cela l'intéresse ([référence d'installation sur le GitHub de raylib](https://github.com/raysan5/raylib?tab=readme-ov-file#build-and-installation)).
 
-Avec CMake, on pourra directement installer Raylib pour le projet, ce qui permet de ne pas avoir à s'en soucier sur chaque appareil sur lequel on sera amené à travailler. Pour commencer, il faut créer un fichier `CMakeLists.txt` à la racine du projet, qui contiendra les instructions de construction pour les différents exécutables. On commence par indiquer la version minimale de CMake requise, ainsi que la version de C++ à utiliser. On peut également indiquer le nom du projet et sa version. Finalement, on ajoute les instructions pour définir les répertoires de sortie des exécutables et des bibliothèques afin de les retrouver facilement.
+Avec CMake, on pourra directement installer raylib depuis CMake lui-même, ce qui permet de ne pas avoir à s'en soucier sur chaque appareil sur lequel on sera amené à travailler.
 
-```cmake 
+Pour commencer, il faut créer un fichier `CMakeLists.txt` à la racine du projet. C'est un simple fichier texte qui contiendra les instructions de construction pour les différents exécutables. On commence par indiquer la version minimale de CMake requise, ainsi que la version de C++ à utiliser. On peut également indiquer le nom du projet et sa version. Finalement, on ajoute les instructions pour définir les dossiers de sortie des exécutables et des bibliothèques afin de les retrouver facilement.
+
+```cmake
 # CMakeLists.txt
 cmake_minimum_required(VERSION 3.21)
 project(NOM_DU_PROJET)
@@ -51,12 +56,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 ```
 
-Ensuite, on peut ajouter les instructions pour vérifier si Raylib est installé sur le système, et s'il ne l'est pas, de l'installer. Si l'on désire avoir accès à des boutons, on peut également ajouter l'installation de [Raygui](https://github.com/raysan5/raygui) (une autre option pour Raygui est de copier le [header](https://github.com/raysan5/raygui/blob/master/src/raygui.h) dans le projet et de le traiter comme un header classique).
+Ensuite, on peut ajouter les instructions pour vérifier si raylib est installé sur le système, et s'il ne l'est pas, de l'installer. Si l'on désire avoir accès à des boutons, on peut également ajouter l'installation de [raygui](https://github.com/raysan5/raygui) (une autre option pour utiliser raygui est de copier le fichier d'en-tête [`raygui.h`](https://github.com/raysan5/raygui/blob/master/src/raygui.h) dans le projet et de le traiter comme un fichier d'en-tête classique).
 
 ```cmake
 # CMakeLists.txt
 # ...
 # Inspiré de https://github.com/raysan5/raylib/blob/master/projects/CMake/CMakeLists.txt
+
 include(FetchContent)
 set(FETCHCONTENT_QUIET FALSE)
 
@@ -83,6 +89,10 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(raygui)
 ```
+
+
+TODO: déplacer plus loin et faire le lien
+
 
 Considérons une structure de projet comme suit :
 
@@ -116,7 +126,7 @@ Considérons une structure de projet comme suit :
         └── raylib_render.h
 ```
 
-Le fichier `CMakeLists.txt` traiter jusqu'à présent est celui de la racine du projet, et il faut encore lui ajouter les sous-répertoires où chercher les fichiers sources et les headers.
+Le fichier `CMakeLists.txt` traiter jusqu'à présent est celui de la racine du projet, et il faut encore lui ajouter les sous-dossiers où chercher les fichiers sources et les fichiers d'en-tête.
 
 ```cmake
 # CMakeLists.txt
@@ -125,31 +135,34 @@ add_subdirectory(QuatriemeExemple)
 add_subdirectory(SixiemeExemple)
 ```
 
-On présente maintenant la configuration pour le quatrième et le sixième exemple, car ils présentent chacun des particularités utiles à savoir. Le quatrième, outre Raylib, il utilise aussi Raygui, et le sixième exemple utilise un modèle 3D, ce qui nécessite de le copier pour le rendre accessible au programme.
+On présente maintenant la configuration pour le quatrième et le sixième exemple, car ils présentent chacun des particularités utiles à savoir. Le quatrième exemple utilise aussi raygui en plus de raylib ; et le sixième exemple utilise un modèle 3D, ce qui nécessite de copier ce modèle pour le rendre accessible au programme.
 
-Dans tous les cas, on ajoute dans chaque sous-dossier un fichier `CMakeLists.txt` qui va gérer tout ce qu'il y a dans celui-ci. Dans ceux où il n'y a pas de fichiers particuliers, par exemple dans `QuatriemeExemple`, on inclut simplement les sous-dossiers `general` et `raylib`, qui contiennent notre programme.
+Dans tous les cas, on ajoute dans chaque sous-dossier un fichier `CMakeLists.txt` qui va gérer tout ce qu'il y a dans ce sous-dossier. Dans ceux où il n'y a pas de fichiers particuliers, par exemple dans `QuatriemeExemple`, on inclut simplement les sous-dossiers `general` et `raylib`, qui contiennent notre programme :
 
 ```cmake
 # QuatriemeExemple/CMakeLists.txt
+
 add_subdirectory(general)
 add_subdirectory(raylib)
 ```
 
-Pour le dossier `general`, on va créer une librairie avec les fichiers `contenu.h`, `dessinable.h` et `support_a_dessin.h`, qui pourra être utilisée dans le reste du projet.
+Pour le dossier `general`, on va créer une bibliothèque avec les fichiers `contenu.h`, `dessinable.h` et `support_a_dessin.h`, laquelle pourra être utilisée dans le reste du projet.
 
 ```cmake
 # QuatriemeExemple/general/CMakeLists.txt
+
 add_library(Ex4Dessin contenu.h dessinable.h support_a_dessin.h)
 set_target_properties(Ex4Dessin PROPERTIES LINKER_LANGUAGE CXX) # Car CMake ne peut pas le deviner (.h est commun à C et C++)
 target_include_directories(Ex4Dessin PUBLIC ${PROJECT_SOURCE_DIR}/QuatriemeExemple/general)
 ```
 
-> Quand il n'y a que des fichiers `.h`, il faut spécifier que ce sont des fichiers C++ avec `LINKER_LANGUAGE CXX`, sinon cela fait une erreur. De plus, pour que d'autres fichiers puissent utiliser cette librairie, il faut ajouter le dossier contenant les headers avec `target_include_directories`.
+> Quand il n'y a que des fichiers `.h`, il faut spécifier que ce sont des fichiers d'en-tête C++ grace à la propriété `LINKER_LANGUAGE CXX`, sinon on obtient une erreur. De plus, pour que d'autres fichiers puissent utiliser cette bibliothèque, il faut ajouter le dossier contenant les fichiers d'en-tête avec `target_include_directories`.
 
-Dans le dossier `raylib`, on va créer une librairie qui va contenir le fichier `raylib_render.cpp` et son header, et un exécutable à partir du fichier `main_raylib.cpp`. À noter que pour la librairie, on va lier toutes les librairies que l'on utilise dans celle-ci, donc Raylib et la librairie `Ex4Dessin` que l'on vient de créer, mais on a ensuite plus besoin de s'en soucier au moment d'utiliser cette nouvelle librairie.
+Dans le dossier `raylib`, on va créer une bibliothèque qui va contenir le fichier `raylib_render.cpp` et son fichier d'en-tête, et un exécutable à partir du fichier `main_raylib.cpp`.
 
 ```cmake
 # QuatriemeExemple/raylib/CMakeLists.txt
+
 add_library(Ex4RayRender raylib_render.h raylib_render.cpp)
 target_link_libraries(Ex4RayRender raylib Ex4Dessin)
 target_include_directories(Ex4RayRender PRIVATE ${raygui_SOURCE_DIR}/src)
@@ -158,12 +171,13 @@ add_executable(Exemple4 main_raylib.cpp)
 target_link_libraries(Exemple4 Ex4RayRender)
 ```
 
-> Comme Raygui est un header, il faut inclure son dossier dans la cible l'utilisant, dans ce cas `Ex4RayRender`, avec `target_include_directories`.
+> Comme raygui est un fichier d'en-tête, il faut inclure son dossier (`Ex4RayRender`) dans la cible l'utilisant (on l'ajoute donc à `target_include_directories`).
 
-Pour le sixième exemple, c'est identique. On ajoute juste une ligne pour copier le modèle 3D dans le dossier de sortie (`${CMAKE_BINARY_DIR}/bin` configuré au tout début de cette section), afin qu'il soit accessible au programme. 
+On procède de façon similaire pour le sixième exemple. On ajoute juste une ligne supplémentaire pour copier le modèle 3D dans le dossier de sortie (`${CMAKE_BINARY_DIR}/bin` configuré au tout début de cette section), afin qu'il soit accessible au programme final.
 
 ```cmake
 # SixiemeExemple/raylib/CMakeLists.txt
+
 add_library(Ex6RayRender raylib_render.h raylib_render.cpp)
 target_link_libraries(Ex6RayRender raylib Ex6Dessin)
 file(COPY ${PROJECT_SOURCE_DIR}/SixiemeExemple/monkey.glb DESTINATION ${CMAKE_BINARY_DIR}/bin/ressources)
@@ -174,7 +188,7 @@ target_link_libraries(Exemple6 Ex6RayRender)
 
 Maintenant que le CMake est configuré, on peut l'utiliser pour compiler le projet. Pour cela, il faut se placer dans le dossier `build` et exécuter les commandes suivantes :
 
-```bash
+```sh
 cmake ..
 cmake --build .
 ```
@@ -191,74 +205,139 @@ Pour exécuter un des exécutables, il suffit de se placer dans le dossier `bin`
 
 ## Premier exemple : prise en main
 
-Commençons par la construction d'une première fenêtre, avec un texte et une figure en deux dimensions. On fait d'abord cela dans un unique fichier, que l'on modularisera par la suite.
+Commençons par la construction d'une simple fenêtre avec un texte et une figure en deux dimensions. Nous allons d'abord faire cela dans un seul fichier, puis l'on modularisera par la suite.
 
-Il faut tout d'abord inclure les fichiers d'en-tête de Raylib, et écrivons la fonction `main`.
+Commencer par créer un sous-dossier (p.ex. `PremierExemple`, mais vous pouvez choisir librement ce nom, tant que vous restez cohérent(e) au niveau de votre `CMakeLists.txt`).  
+Ajoutez ensuite ce sous-dossier à votre fichier `CMakeLists.txt` principal :
+
+```cmake
+add_subdirectory(PremierExemple)
+```
+
+Allez ensuite dans le sous-dossier `PremierExemple` et créez votre fichier C++, p.ex. `main_exemple1.cpp` (mais vous pouvez changer librement ce nom).
+
+Il faut tout d'abord inclure les fichiers d'en-tête de raylib, puis écrire la fonction `main()` :
 
 ```c++
 #include <raylib.h>
-
 
 int main() {
     // À compléter
+    return 0;
 }
 ```
 
-Pour pouvoir afficher quelque chose, nous commençons par initialiser la fenêtre. On peut le faire en utilisant la fonction `InitWindow`, qui prend en argument la largeur et la hauteur de la fenêtre, ainsi qu'un titre. Il faut ensuite faire une boucle d'affichage, qui se termine lorsque l'utilisateur ferme la fenêtre. Finalement, il ne faut pas oublier de libérer les ressources utilisées par Raylib via la fonction `CloseWindow`.
+Pour pouvoir afficher quelque chose, nous commençons par initialiser la fenêtre. On peut le faire en utilisant la [fonction `InitWindow()`](https://www.raylib.com/cheatsheet/cheatsheet.html), qui prend en argument la largeur et la hauteur de la fenêtre, ainsi qu'un titre.  
+Et comme toujours en programmation, il faut libérer toute ressource que l'on a utilisé, donc on termine le programme par la fonction `CloseWindow()`.
 
 ```c++
 #include <raylib.h>
 
+int main() {
+    InitWindow(800, 450, "Premier exemple");
+
+    CloseWindow();
+    return 0;
+}
+```
+
+Il faut ensuite lancer la boucle principale d'attente d'évènements, qui se terminera lorsque l'utilisateur fermera la fenêtre :
+
+```c++
+#include <raylib.h>
 
 int main() {
     InitWindow(800, 450, "Premier exemple");
 
     while (!WindowShouldClose()) {
         BeginDrawing();
-               
-            // Ce que l'on veut afficher     
-              
+
+            // Ce que l'on veut afficher
+
         EndDrawing();
     }
 
     CloseWindow();
+    return 0;
 }
 ```
 
-On peut maintenant ajouter différents éléments à afficher. Par exemple, on peut afficher un texte en utilisant la fonction `DrawText`, qui prend en argument le texte à afficher, la position du coin supérieur gauche du texte, la taille de la police et la couleur du texte.
+On peut maintenant ajouter différents éléments à afficher. Par exemple, on peut afficher un texte en utilisant la fonction `DrawText()`, qui prend en argument le texte à afficher, la position du coin supérieur gauche du texte, la taille de la police et la couleur du texte.
 
-Il y a également la possibilité d'afficher des formes géométriques. Par exemple, on peut afficher un cercle via la fonction `DrawCircle`, qui prend en argument le centre du cercle, son rayon, sa couleur et sa bordure ([on trouvera ici d'autres exemples de formes 2D](https://www.raylib.com/examples/shapes/loader.html?name=shapes_basic_shapes)).
+Il y a également la possibilité d'afficher des formes géométriques. Par exemple, on peut afficher un cercle via la fonction `DrawCircle()`, qui prend en argument le centre du cercle, son rayon, sa couleur et sa bordure ([on trouvera ici d'autres exemples de formes 2D](https://www.raylib.com/examples/shapes/loader.html?name=shapes_basic_shapes)).
 
-Il est important en règle générale de remettre la couleur de fond de la fenêtre à chaque frame, pour éviter que les éléments ne se superposent. Celà se fait via la fonction `ClearBackground`, qui prend en argument la couleur desirée.
+Il est important en règle générale de remettre la couleur de fond de la fenêtre à chaque tour de boucle, pour éviter que les éléments ne se superposent. Celà se fait via la fonction `ClearBackground()`, laquelle prend en argument la couleur desirée.
 
 ```c++
 #include <raylib.h>
-
 
 int main() {
     InitWindow(800, 450, "Premier exemple");
 
     while (!WindowShouldClose()) {
         BeginDrawing();
-        
-            ClearBackground(RAYWHITE);
-               
-            DrawText("Ceci est un cercle", 20, 20, 20, DARKGRAY);
 
-            DrawCircle(400, 225, 100, RED);  
-                      
+        ClearBackground(RAYWHITE);
+
+        DrawText("Ceci est un cercle", 20, 20, 20, DARKGRAY);
+
+        DrawCircle(400, 225, 100, RED);
+
         EndDrawing();
     }
 
     CloseWindow();
+    return 0;
 }
 ```
 
-À ce stade, cela devrait ressembler à ceci :
+Et voilà !
+
+Il nous faut maintenant compiler. Pour cela il faut créer un fichier `CMakeLists.txt` dans le sous-dossier `PremierExemple`.
+Ce fichier va gérer tout ce qu'il y a dans ce sous-dossier.
+Ici c'est très simple :
+
+- on n'a qu'un seul fichier source ; il suffit simplement de choisir un nom pour notre fichier exécutable, p.ex. `exemple1` (contrairement à ce que l'on fait d'habitude en exercices, il n'est pas nécessaire que cet exécutable ait le même nom que le fichier source qui contient le `main()` ; on est libre de choisir) ;
+- et il faut dire que l'on veut utiliser la bibliothèque (« _library_ ») raylib.
+
+Ce qui donne :
+
+```cmake
+# CMakeLists.txt du premier exemple
+
+add_executable(exemple1 main_exemple1.cpp)
+target_link_libraries(exemple1 raylib)
+```
+
+Pour compiler tout en gardant propres les (sous-)dossiers des codes sources, on a l'habitude de créer un sous-dossier `build` pour tout le projet : sous le dossier princpal créez le sous-dossier `buid` et allez-y :
+
+```
+.
+├── build
+├── CMakeLists.txt
+└── PremierExemple
+    ├── CMakeLists.txt
+    └── main_exemple1.cpp
+```
+
+Depuis ce sous-dossier `build`, lancez les deux commandes suivantes :
+
+```sh
+cmake ..
+cmake --build .
+```
+
+Cela va :
+
+- créer tout ce qui est nécessaire pour compiler ;
+- installer raylib si elle n'est pas déjà installée ;
+- compiler votre programme, et créer l'exécutable `bin/exemple1`.
+
+Vous pouvez donc lancer exécutable (`build/bin/exemple1`). Cela devrait ressembler à ceci :
 
 ![ex1_img.png](PremierExemple/ex1_img.png)
 
-Avant de passer à la suite, nous mentionnerons encore plusieurs paramètres pouvant être utiles quant au paramétrage de la fenêtre. Par exemple, il y a un système de `flags` qui permettent de définir le comportement de la fenêtre ([exemple des `flags` possibles](https://www.raylib.com/examples/core/loader.html?name=core_window_flags)). On peut par exemple définir si la fenêtre est redimensionnable, si elle est en plein écran, si elle est visible, etc. On peut également lui fixer une taille minimale afin que nos éléments ne soient pas trop écrasés. Il est aussi commun de fixer un nombre de frames par seconde, pour éviter que le programme ne tourne trop vite.
+Avant de passer à la suite, mentionnons plusieurs paramètres pouvant être utiles pour la configuration de la fenêtre. Par exemple, il y a un système de `flags` qui permettent de définir son comportement ([exemple des `flags` possibles](https://www.raylib.com/examples/core/loader.html?name=core_window_flags)). On peut par exemple définir si la fenêtre est redimensionnable, si elle est en plein écran, si elle est visible, etc. On peut également lui fixer une taille minimale afin que nos éléments ne soient pas trop écrasés. Il est aussi commun de fixer un nombre de frames par seconde (FPS), pour éviter que le programme ne tourne trop vite.
 
 ```c++
 // ###########################################################
@@ -280,7 +359,7 @@ SetWindowMinSize(360, 320);
 SetTargetFPS(60);
 ```
 
-Finalement, nous allons voir comment centrer le cercle dans la fenêtre lorsqu'elle est redimensionnable. Pour cela, on peut utiliser la fonction `GetScreenWidth` et `GetScreenHeight` pour obtenir la taille de l'écran, et ainsi calculer la position du cercle. Afin d'améliorer la lisibilité du code, on peut également définir deux variables pour la largeur et la hauteur de la fenêtre.
+Finalement, nous allons voir comment centrer le cercle dans la fenêtre lorsqu'elle est redimensionnable. Pour cela, on peut utiliser les fonctions `GetScreenWidth()` et `GetScreenHeight()` pour obtenir la taille de l'écran, et ainsi calculer la position du cercle :
 
 ```c++
 #include <raylib.h>
@@ -288,6 +367,7 @@ Finalement, nous allons voir comment centrer le cercle dans la fenêtre lorsqu'e
 
 int main()
 {
+    // Valeurs initiales, modifiables par la suite
     int largeur = 800;
     int hauteur = 450;
 
@@ -297,7 +377,7 @@ int main()
 
     SetTargetFPS(60);
 
-    //Boucle principale
+    // Boucle principale
     while (!WindowShouldClose())
     {
         /*
@@ -320,81 +400,127 @@ int main()
     }
 
     CloseWindow();
+    return 0;
 }
 ```
 
-> Pour découvrir d'autres exemples et trouver de l'inspiration, on pourra consulter la [galerie d'exemples de Raylib](https://www.raylib.com/examples.html). Il existe également une page regroupant les [différentes fonctions de Raylib](https://www.raylib.com/cheatsheet/cheatsheet.html), mais elle est moins pratique à utiliser.
+> Pour découvrir d'autres exemples et trouver de l'inspiration, on pourra consulter la [galerie d'exemples de raylib](https://www.raylib.com/examples.html). Il existe également une page regroupant les [différentes fonctions de raylib](https://www.raylib.com/cheatsheet/cheatsheet.html), mais elle est moins pratique à utiliser.
 
 ---
 
 ## Deuxième exemple : modularisation et dessin 3D
 
-On va maintenant modulariser notre code. Le but ici est de séparer ce que l'on veut visualiser et le contenu de celui-ci. L'idée est d'organiser le programme selon deux grand principe (dit "[design patterns](https://fr.wikipedia.org/wiki/Patron_de_conception)") :
+On va maintenant modulariser notre code. Le but ici est de séparer ce que l'on veut visualiser et le contenu de celui-ci. L'idée est d'organiser le programme selon deux grands principes (dit « [_design patterns_](https://fr.wikipedia.org/wiki/Patron_de_conception) ») :
 
-- Clairement séparer trois choses : la gestion de l'application (le `main` ou le `run`, cf. plus loin), le contenu à afficher et la façon de l'afficher (dans les différentes formes : affichage à l'écran, texte, dans un fichier, ...).
-- Et il en suit une claire distinction entre ce qui doit être affiché, et la manière de le faire sur les différents supports, celle-ci ne devant pas intérferer avec le contenu.
+- clairement séparer trois choses :
+  - la gestion de l'application (le `main` ou le `run`, cf. plus loin) ;
+  - le contenu à afficher ;
+  - et la façon de l'afficher (dans les différentes formes : affichage à l'écran, texte, dans un fichier, ...) ;
+- avoir une claire distinction entre ce qui doit être affiché, et la manière de le faire sur les différents supports, celle-ci ne devant pas intérferer avec le contenu.
 
 > Dans ce qui suit, nous détaillons la démarche, mais il n'est pas nécessaire de tout comprendre dans le détail pour pouvoir bien réutiliser le code fourni. Néanmoins, une fois les connaissances nécessaires à la compréhension de celui-ci acquise, il peut toujours être intéressant de revenir sur les différents choix de conception.
 
-Nous allons séparer le code sur trois grands axes (libre au lecteur d'adapter cela à ses besoins), dans trois répertoires (voir l'arborencense dans ["Installation et compilation"](#installation-et-compilation)) :
+Nous allons séparer le code sur trois grands axes (libre au lecteur d'adapter cela à ses besoins), dans trois sous-dossiers :
+
+- `general` : qui contient tout le code « général », le coeur du projet, indépendemment de la façon dont il est visualisé ;
+- `text` : qui contient la « visualisation » en mode texte, donc simplement l'affichage de messages sur le terminal ;
+- `raylib` : qui contient la visualisation graphique en utilisant la bibliothèque raylib.
+
+D'un point de vue abstrait, nous différencierons ce qui est _dessinable_ (les objets que l'on veut voir visualisés) et les _supports à dessin_ (les environnements que l'on utilise pour visualiser : ici en mode texte ou avec la bibliothèque graphique raylib ; mais on pourrait imaginer d'autres modes comme par exemple des représentations numériques (suites de nombres) dans des fichiers binaires, ou d'autres bibliothèques graphiques, etc.).
+
+Créez un nouveau sous-dossier dans votre projet, p.ex. `DeuxiemeExemple`, et créez y les trois sous-dossiers cités ci-dessus. Vous avez alors l'architecture suivante :
+
+```
+.
+├── build
+├── CMakeLists.txt
+├── PremierExemple
+│   ├── CMakeLists.txt
+│   └── main_exemple1.cpp
+└── DeuxiemeExemple
+    ├── general
+    ├── raylib
+    └── text
+```
+
+Pensez aussi à ajouter ce nouveau dossier à votre `CMakeLists.txt` principal :
+
+```cmake
+add_subdirectory(DeuxiemeExemple)
+```
+
 
 ### Général
 
-D'un point de vue abstrait, nous différencierons ce qui est dessinable et les supports à dessein, comme dit en préambule. Conceptuellement, le dessinable est le plus simple, il lui suffit d'avoir une méthode permettant de le dessiner sur un support.
+Dans le sous-dossier `general`, nous mettons donc tout ce qui relève de l'aspect général du projet, indépendemment de la visualisation _concrète_. On a donc en particulier ici les deux concepts (abstractions) de « dessinable » et de « support à dessin ».  
+Conceptuellement, les « dessinables » sont les plus simples : il suffit d'avoir une méthode permettant de les dessiner sur un support à dessin :
 
 ```c++
 // dessinable.h
 #pragma once
 
-class SupportADessin;
+class SupportADessin; // pré-déclaration
 
 class Dessinable {
 public:
+
+    // la raison d'être des Dessinable
     virtual void dessine_sur(SupportADessin&) = 0;
 
-    // Mise par défaut des constructeurs, ...
-    virtual ~Dessinable() = default;
-    Dessinable(Dessinable const&) = default;
-    Dessinable& operator=(Dessinable const&) = default;
-    Dessinable(Dessinable&&) = default;
-    Dessinable& operator=(Dessinable&&) = default;
+    // mise en virtuel du destructeur (puisque classe abstraite)
+    virtual ~Dessinable()                    = default;
 
+    // remise par défaut des constructeurs de copie et de déplacement
+    Dessinable(Dessinable const&)            = default;
+    Dessinable& operator=(Dessinable const&) = default;
+    Dessinable(Dessinable&&)                 = default;
+    Dessinable& operator=(Dessinable&&)      = default;
+
+    // et remise aussi par défaut du constructeur par défaut
     Dessinable() = default;
 };
 ```
 
-Le support fournit quant à lui une méthode pour dessiner les différents contenus.
+Un support à dessin fournit quant à lui une méthode pour dessiner les différents contenus (pour l'instant les contenus sont flous, c'est juste pour l'exemple, mais ce sont eux qui seront les objets concrets que l'on veut dessiner) :
 
 ```c++
 // support_a_dessin.h
 #pragma once
 
+// prédéclaration de tous les contenus que l'on veut dessiner
 class Contenu;
+// ....
 
 class SupportADessin {
 public:
-    virtual ~SupportADessin() = default;
-    // On ne copie pas les Supports.
-    SupportADessin(SupportADessin const&) = delete;
-    SupportADessin& operator=(SupportADessin const&) = delete;
-    // Mais on peut les déplacer.
-    SupportADessin(SupportADessin&&) = default;
-    SupportADessin& operator=(SupportADessin&&) = default;
-
-    SupportADessin() = default;
-
-    virtual void dessine(Contenu const& a_dessiner) = 0;
 
     /*
+     * La raison d'être des Dessinable
+     *
      * Mettre ici toutes les méthodes nécessaires pour dessiner tous les
      * objets que l'on veut dessiner. Par exemple :
      */
+    virtual void dessine(Contenu const& a_dessiner) = 0;
     // virtual void dessine(Nounours const& a_dessiner) = 0;
-    // virtual void dessine(Voiture const& a_dessiner) = 0;
+    // virtual void dessine(Voiture  const& a_dessiner) = 0;
+
+    // mise en virtuel du destructeur (puisque classe abstraite)
+    virtual ~SupportADessin() = default;
+
+    // on ne copie pas les supports à dessin
+    SupportADessin(SupportADessin const&)            = delete;
+    SupportADessin& operator=(SupportADessin const&) = delete;
+
+    // mais on peut les déplacer
+    SupportADessin(SupportADessin&&)            = default;
+    SupportADessin& operator=(SupportADessin&&) = default;
+
+    // on remet aussi la version par défaut du constructeur par défaut
+    SupportADessin() = default;
 };
 ```
 
-Maintenant, pour notre contenu, il suffit de dériver de la classe `Dessinable` et de redéfinir la méthode `dessine_sur` comme suit :
+Maintenant, pour chaque contenu, il suffit de dériver de la classe `Dessinable` et de redéfinir la méthode `dessine_sur()` comme suit :
 
 ```c++
 // contenu.h
@@ -405,33 +531,35 @@ Maintenant, pour notre contenu, il suffit de dériver de la classe `Dessinable` 
 
 class Contenu : public Dessinable {
 public:
-    /*
-     * Le reste de la classe peut être quelconque selon les besoins.
-     */
-    ~Contenu() override = default;
-    Contenu(Contenu const&) = default;
+    // à adapter suivant les besoins :
+    ~Contenu()                override = default;
+    Contenu(Contenu const&)            = default;
     Contenu& operator=(Contenu const&) = default;
-    Contenu(Contenu&&) = default;
-    Contenu& operator=(Contenu&&) = default;
-
-    Contenu() = default;
+    Contenu(Contenu&&)                 = default;
+    Contenu& operator=(Contenu&&)      = default;
+    Contenu()                          = default;
 
     /*
      * Ceci est la méthode devant être ajoutée à toute classe
-     * étendant Dessinable, afin de pouvoir être dessinée.
+     * étendant Dessinable, afin de pouvoir être dessinée correctement.
      */
     void dessine_sur(SupportADessin& support) override
     { support.dessine(*this); }
+
+    /*
+     * Le reste de la classe peut être quelconque selon les besoins.
+     */
 };
 ```
 
-`dessine_sur` fait alors exactement ce que son nom indique, elle va appeler la méthode `dessine` du support, en lui passant le contenu à dessiner. 
+`dessine_sur()` fait alors exactement ce que son nom indique : elle va appeler la méthode `dessine()` du support à dessin, en lui passant le contenu à dessiner, c.-à-d. elle-même.
 
-> Le fait de devoir copier cette définition de `dessine_sur`, qui est la même pour chaque `Dessinable`, peut paraitre contre intuitif (en effet, pourquoi ne pas juste la mettre dans dessinable ?). Cela est entre autre dû au fait que cette architecture, appelée "[double dispatch](https://en.wikipedia.org/wiki/Double_dispatch)", est une généralisation du polymorphisme qui n'est pas totalement prévue en C++.
+> Le fait de devoir _copier_ cette définition de `dessine_sur()`, qui est la même pour chaque `Dessinable`, peut paraitre contre intuitif (en effet, pourquoi ne pas juste la mettre dans dessinable ?). Cela est entre autre dû au fait que cette architecture, appelée « [_double dispatch_](https://en.wikipedia.org/wiki/Double_dispatch) », est une généralisation du polymorphisme qui n'est pas totalement prévue en C++.
+
 
 ### Texte
 
-Passons donc à l'utilisation de cette nouvelle abstraction pour visualiser notre contenu en mode texte, avec un `main` ressemblant à cela :
+Passons maintenant à l'utilisation de cette nouvelle abstraction pour visualiser notre contenu en mode texte, avec un `main()` ressemblant à cela (à mettre dans le sous-dossier `text`) :
 
 ```c++
 // main_text.cpp
@@ -450,7 +578,7 @@ int main()
 }
 ```
 
-Le `TextViewer` est un support qui va afficher le contenu sur la sortie standard.
+Le `TextViewer` est un support à dessin qui va afficher le contenu sur un `ostream` comme p.ex. la sortie standard (`std::cout`).
 
 ```c++
 // text_viewer.h
@@ -463,11 +591,11 @@ class TextViewer : public SupportADessin {
 public:
     explicit TextViewer(std::ostream& flot) : flot(flot) {}
 
-    ~TextViewer() override = default;
-    TextViewer(TextViewer const&) = delete;
+    ~TextViewer() override                   = default;
+    TextViewer(TextViewer const&)            = delete;
     TextViewer& operator=(TextViewer const&) = delete;
-    TextViewer(TextViewer&&) = default;
-    TextViewer& operator=(TextViewer&&) = default;
+    TextViewer(TextViewer&&)                 = default;
+    TextViewer& operator=(TextViewer&&)      = default;
 
     /*
      * Il faut surcharger la méthode dessine pour dessiner le contenu.
@@ -480,7 +608,7 @@ private:
 };
 ```
 
-On peut alors implémenter la méthode `dessine` pour afficher le contenu sur la sortie standard.
+On peut alors implémenter la méthode `dessine()` pour afficher le contenu sur la sortie standard.
 
 ```c++
 // text_viewer.cpp
@@ -502,7 +630,83 @@ void TextViewer::dessine(Contenu const&)
 }
 ```
 
-Bien entendu que dans un cas concret, nous utiliserons le contenu en paramètre afin d'afficher quelque chose de pertinent ! Maintenant, si l'on compile et exécute le `main` fournit au début, on a bien dans le terminal :
+Bien entendu que dans un cas concret, nous utiliserons le contenu en paramètre afin d'afficher quelque chose de pertinent. Ici pour simplifier `Contenu` n'est qu'une coquille vide. Cela changer.
+
+À ce stade, on a donc les fichiers suivants (dans le sous-dossier `DeuxiemeExemple`) :
+
+```
+.
+├── general
+│   ├── contenu.h
+│   ├── dessinable.h
+│   └── support_a_dessin.h
+├── raylib
+└── text
+    ├── main_text.cpp
+    ├── text_viewer.cpp
+    └── text_viewer.h
+```
+
+Essayons de compiler. Il faut pour cela créer les trois `CMakeLists.txt` :
+
+- dans le sous-dossier `DeuxiemeExemple` lui-même : simplement annoncer les trois sous-dossiers :
+
+```cmake
+add_subdirectory(general)
+# add_subdirectory(raylib) # on commente pour le moment car on va commencer par le texte
+add_subdirectory(text)
+```
+
+- dans le sous-dossier `DeuxiemeExemple/general` : on va créer une bibliothèque avec les fichiers `contenu.h`, `dessinable.h` et `support_a_dessin.h`, laquelle pourra être utilisée dans le reste du projet :
+
+```cmake
+# general/CMakeLists.txt
+
+add_library(Dessin contenu.h dessinable.h support_a_dessin.h)
+set_target_properties(Dessin PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(Dessin PUBLIC ${PROJECT_SOURCE_DIR}/DeuxiemeExemple/general)
+```
+
+> Quand il n'y a que des fichiers `.h`, il faut spécifier que ce sont des fichiers d'en-tête C++ grace à la propriété `LINKER_LANGUAGE CXX`, sinon on obtient une erreur (confusion avec le C). De plus, pour que d'autres fichiers puissent utiliser cette bibliothèque, il faut ajouter le dossier contenant les fichiers d'en-tête avec `target_include_directories`.
+
+- dans le sous-dossier `DeuxiemeExemple/text` : 
+
+```cmake
+# text/CMakeLists.txt
+
+add_library(TextViewer text_viewer.h text_viewer.cpp)
+target_link_libraries(TextViewer Dessin)
+
+add_executable(exemple2_text main_text.cpp)
+target_link_libraries(exemple2_text TextViewer)
+```
+
+On a donc les fichiers suivants :
+
+```
+├── CMakeLists.txt
+├── general
+│   ├── CMakeLists.txt
+│   ├── contenu.h
+│   ├── dessinable.h
+│   └── support_a_dessin.h
+├── raylib
+└── text
+    ├── CMakeLists.txt
+    ├── main_text.cpp
+    ├── text_viewer.cpp
+    └── text_viewer.h
+```
+
+On peut alors retourner dans le sous-dossier `build` (tout en haut) et refaire :
+
+```sh
+cmake ..
+cmake --build .
+```
+
+Ce qui compile les bibliothèques que nous voulons créer, puis l'exécutable `build/bin/exemple2_text`.
+Si on le lance, on a bien dans le terminal :
 
 ```
 +------+.
@@ -514,7 +718,7 @@ Bien entendu que dans un cas concret, nous utiliserons le contenu en paramètre 
    `+------+
 ```
 
-### Raylib
+### raylib
 
 Pour l'affichage graphique, nous procéderons un peu différemment, et notre `main` ressemblera à ceci :
 
@@ -524,12 +728,13 @@ Pour l'affichage graphique, nous procéderons un peu différemment, et notre `ma
 
 int main()
 {
-    RaylibRender ecran;
+    raylibRender ecran;
     ecran.run();
+    return 0;
 }
 ```
 
-Ici, nous appelons la méthode `dessine_sur` dans la méthode `run`, et nous avons le contenu qui sera un attribut de la classe `RaylibRender`.
+Ici, nous appelons la méthode `dessine_sur` dans la méthode `run`, et nous avons le contenu qui sera un attribut de la classe `raylibRender`.
 
 ```c++
 // raylib_render.h
@@ -539,17 +744,17 @@ Ici, nous appelons la méthode `dessine_sur` dans la méthode `run`, et nous avo
 #include "contenu.h"
 #include <raylib.h>
 
-class RaylibRender final : public SupportADessin {
+class raylibRender final : public SupportADessin {
 public:
-    RaylibRender();
-    ~RaylibRender() override;
+    raylibRender();
+    ~raylibRender() override;
 
     void run();
 
     void dessine(Contenu const& a_dessiner) override;
 private:
     Camera3D camera = { 0 };
-    
+
     Contenu c;
 };
 ```
@@ -560,7 +765,7 @@ Dans cette partie, nous aborderons aussi le dessin 3D, d'où la caméra mise en 
 
 ```c++
 // raylib_render.cpp
-RaylibRender::RaylibRender() {
+raylibRender::raylibRender() {
     // parmétres de la fenêtre
     SetConfigFlags(FLAG_WINDOW_HIGHDPI);
     InitWindow(800, 600, "Un cube");
@@ -575,19 +780,19 @@ RaylibRender::RaylibRender() {
     SetTargetFPS(60);
 }
 
-RaylibRender::~RaylibRender() {
+raylibRender::~raylibRender() {
     CloseWindow();
 }
 ```
 
-On notera donc que l'initialisation et la fermeture de la fenêtre sont identiques, mais on y rajoute des paramètres de caméra, comme sa position, le point qu'elle vise (`target`), le vecteur représentant la direction "haut" pour elle (`up`), son champ de vision (`fovy`) et le type de projection.
+On notera donc que l'initialisation et la fermeture de la fenêtre sont identiques, mais on y rajoute des paramètres de caméra, comme sa position, le point qu'elle vise (`target`), le vecteur représentant la direction « haut » pour elle (`up`), son champ de vision (`fovy`) et le type de projection.
 
 > Il est aussi possible de faire [une caméra dans le cas 2D](https://www.raylib.com/examples/core/loader.html?name=core_2d_camera), mais cela ne sera pas abordé ici.
 
 On peut maintenant faire notre fonction `run` afin d'avoir un affichage fonctionnel.
 
 ```c++
-void RaylibRender::run() {
+void raylibRender::run() {
     while (!WindowShouldClose()) {
         BeginDrawing();
             ClearBackground(RAYWHITE);
@@ -606,7 +811,7 @@ void RaylibRender::run() {
 Comme dans le premier exemple, on a notre boucle d'exécution où l'on remet un fond blanc avant de dessiner. Néanmoins, nous devons maintenant entrer dans un mode 3D, avec notre caméra en argument, afin de dessiner nos objets. Il ne manque plus qu'à savoir dessiner le contenu, et cela se fait par la méthode dessine.
 
 ```c++
-void RaylibRender::dessine(Contenu const& a_dessiner) {
+void raylibRender::dessine(Contenu const& a_dessiner) {
     Vector3 cubePosition = { 0.0f, 1.0f, 0.0f };
     DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, LIME);
     DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, DARKGREEN);
@@ -615,23 +820,23 @@ void RaylibRender::dessine(Contenu const& a_dessiner) {
 
 Le dessin d'un cube se fait alors en appelant la fonction `DrawCube` avec en argument la position de celui-ci, sa largeur, sa hauteur, sa profondeur et sa couleur ([on trouvera ici d'autres exemples de figures 3D](https://www.raylib.com/examples/models/loader.html?name=models_geometric_shapes)).
 
-> Notons que les fonctions de Raylib, ayant à la base été faite en C, ne prennent pas en paramètre des `vector` de C++, mais des `Vector2` / `Vector3` de Raylib, selon le nombre de composantes. Similairement, les arguments sont prévus en `float` et non en double, et certaines erreurs peuvent venir de là et sont donc réglables en forçant la conversion en float.
+> Notons que les fonctions de raylib, ayant à la base été faite en C, ne prennent pas en paramètre des `vector` de C++, mais des `Vector2` / `Vector3` de raylib, selon le nombre de composantes. Similairement, les arguments sont prévus en `float` et non en double, et certaines erreurs peuvent venir de là et sont donc réglables en forçant la conversion en float.
 
 Nous obtenons alors un affichage 3D, qui ressemble à ceci :
 
-![ex2_img.png](SecondExemple/ex2_img.png)
+![ex2_img.png](DeuxiemeExemple/ex2_img.png)
 
 Dans les codes ci-dessus, nous utilisons également les fonctions `DrawCubeWires` et `DrawGrid`, qui permettent respectivement de dessiner les contours du cube et une grille au sol afin de mettre en évidence les objets, mais ceci est superflus en soi.
 
-> Les objets peuvent paraitre très plat, car il n'y a pas de système de lumière par défaut, ni de méthode suffisamment simple pour le présenter ici, ce qui fait qu'il n'y a pas d'ombres par exemple (l'[exemple le plus simple](https://www.raylib.com/examples/shaders/loader.html?name=shaders_basic_lighting) gère l'ombre pour chaque objet, et sinon il faudrait faire un système de ["shadow mapping"](https://en.wikipedia.org/wiki/Shadow_mapping)).
+> Les objets peuvent paraitre très plat, car il n'y a pas de système de lumière par défaut, ni de méthode suffisamment simple pour le présenter ici, ce qui fait qu'il n'y a pas d'ombres par exemple (l'[exemple le plus simple](https://www.raylib.com/examples/shaders/loader.html?name=shaders_basic_lighting) gère l'ombre pour chaque objet, et sinon il faudrait faire un système de « [_shadow mapping_](https://en.wikipedia.org/wiki/Shadow_mapping) »).
 
-![ex2_img2.png](SecondExemple/ex2_img2.png)
+![ex2_img2.png](DeuxiemeExemple/ex2_img2.png)
 
 ---
 
 ## Troisième exemple : dessin de plusieurs objets et mouvements de caméra
 
-> Pour les exemples qui suivent, nous nous concentrerons que sur la partie Raylib, et nous ne modifierons pas les fichiers `main_raylib.cpp`, `dessinable.h` et `support_a_dessin.h`.
+> Pour les exemples qui suivent, nous nous concentrerons que sur la partie raylib, et nous ne modifierons pas les fichiers `main_raylib.cpp`, `dessinable.h` et `support_a_dessin.h`.
 
 Afin d'avoir un peu d'intérêt à l'exemple, nous modifions les Contenu comme suit :
 
@@ -665,11 +870,11 @@ private:
 };
 ```
 
-Ceci lui ajoute donc une propriété `position` et une couleur, qui sont toutes deux des attributs de la classe, ainsi qu'un getter et un constructeur. Nous pouvons aussi modifier la déclaration de `RaylibRender` afin d'avoir plusieurs contenus à afficher :
+Ceci lui ajoute donc une propriété `position` et une couleur, qui sont toutes deux des attributs de la classe, ainsi qu'un getter et un constructeur. Nous pouvons aussi modifier la déclaration de `raylibRender` afin d'avoir plusieurs contenus à afficher :
 
 ```c++
 // ...
-class RaylibRender final : public SupportADessin {
+class raylibRender final : public SupportADessin {
 // ...
 private:
     // ...
@@ -684,7 +889,7 @@ private:
 La méthode `dessine` a été modifiée pour utiliser les propriétés de `Contenu` :
 
 ```c++
-void RaylibRender::dessine(Contenu const& a_dessiner) {
+void raylibRender::dessine(Contenu const& a_dessiner) {
     const auto [x, y, z] = a_dessiner.get_position();
     const Vector3 cubePosition = { static_cast<float>(x), static_cast<float>(y), static_cast<float>(z) };
     auto color = WHITE;
@@ -711,7 +916,7 @@ La formulation `const auto [x, y, z] = a_dessiner.get_position();` permet de dé
 Finalement, on veut afficher chaque cube dans la méthode `run`, et pour cela, on peut faire une boucle sur la liste des contenus :
 
 ```c++
-void RaylibRender::run() {
+void raylibRender::run() {
     while (!WindowShouldClose()) {
         BeginDrawing();
             ClearBackground(RAYWHITE);
@@ -725,10 +930,10 @@ void RaylibRender::run() {
 }
 ```
 
-Si l'on veut permettre le movement de la caméra, il suffit d'ajouter la fonction `UpdateCamera` de Raylib :
+Si l'on veut permettre le movement de la caméra, il suffit d'ajouter la fonction `UpdateCamera` de raylib :
 
 ```c++
-void RaylibRender::run() {
+void raylibRender::run() {
     while (!WindowShouldClose()) {
         UpdateCamera(&camera, CAMERA_FREE);
         BeginDrawing();
@@ -755,15 +960,15 @@ L'affichage final ressemble donc à ceci :
 
 Dans ce quatrième exemple, nous allons voir trois interactions possibles :
 
-- Le clavier : utiliser une touche pour activer ou non le déplacement de la caméra.
-- La souris : récupérer sa position et l'utiliser pour y dessiner un objet.
-- Raygui : utiliser un bouton pour activer une fonctionalité.
+- le clavier : utiliser une touche pour activer ou non le déplacement de la caméra ;
+- la souris : récupérer sa position et l'utiliser pour y dessiner un objet ;
+- raygui : utiliser un bouton pour activer une fonctionalité.
 
-Nous allons faire un pointeur rouge qui suit la souris, activable par un bouton. Pour cela, nous devons ajouter deux attributs à la classe `RaylibRender` pour gérer l'état (actif ou non) du mouvement de la caméra et du pointeur :
+Nous allons faire un pointeur rouge qui suit la souris, activable par un bouton. Pour cela, nous devons ajouter deux attributs à la classe `raylibRender` pour gérer l'état (actif ou non) du mouvement de la caméra et du pointeur :
 
 ```c++
 // ...
-class RaylibRender final : public SupportADessin {
+class raylibRender final : public SupportADessin {
 // ...
 private:
     // ...
@@ -775,7 +980,7 @@ private:
 On va commencer par activé le déplacement avec la touche `L`. Pour cela, dans notre boucle principale, on va vérifier si la touche `L` est pressée, et si oui, on va changer l'état du déplacement :
 
 ```c++
-void RaylibRender::run() {
+void raylibRender::run() {
     while (!WindowShouldClose()) {
         if (IsKeyPressed(KEY_L)) {
             deplacement = !deplacement;
@@ -788,7 +993,7 @@ void RaylibRender::run() {
 Ensuite, on va mettre à jour la caméra seulement si le déplacement est activé :
 
 ```c++
-void RaylibRender::run() {
+void raylibRender::run() {
     while (!WindowShouldClose()) {
         if (IsKeyPressed(KEY_L)) {
             deplacement = !deplacement;
@@ -804,7 +1009,7 @@ void RaylibRender::run() {
 Et on peut ajouter un message à l'écran pour indiquer si le déplacement est activé ou non :
 
 ```c++
-void RaylibRender::run() {
+void raylibRender::run() {
     while (!WindowShouldClose()) {
         if (IsKeyPressed(KEY_L))
             deplacement = !deplacement;
@@ -833,7 +1038,7 @@ Pour que le texte soit correctement visible, on ne le dessine pas dans le mode 3
 |----------------------------------------------------|--------------------------------------------------------|
 | ![ex4_camfix.png](QuatriemeExemple/ex4_camfix.png) | ![ex4_camlibre.png](QuatriemeExemple/ex4_camlibre.png) |
 
-Nous allons maintenant voir comment ajouter un bouton. Pour cela, nous allons utiliser la bibliothèque Raygui, que l'on importe comme suit :
+Nous allons maintenant voir comment ajouter un bouton. Pour cela, nous allons utiliser la bibliothèque raygui, que l'on importe comme suit :
 
 ```c++
 // raylib_render.cpp
@@ -844,14 +1049,14 @@ Nous allons maintenant voir comment ajouter un bouton. Pour cela, nous allons ut
 // ...
 ```
 
-> Dû à sa conception, mettre `#define RAYGUI_IMPLEMENTATION` avant d'inclure le fichier d'en-tête est nécessaire pour que Raygui fonctionne.
+> Dû à sa conception, mettre `#define RAYGUI_IMPLEMENTATION` avant d'inclure le fichier d'en-tête est nécessaire pour que raygui fonctionne.
 
-Sur le GitHub de [Raygui](https://github.com/raysan5/raygui), nous pouvons trouver [les différents composants disponibles](https://github.com/raysan5/raygui?tab=readme-ov-file#basic-controls), ainsi que divers programmes pouvant être utile pour réfléchir à l'interface graphique, comme un [éditeur de layout](https://raylibtech.itch.io/rguilayout) ou [d'icones](https://raylibtech.itch.io/rguiicons), et des exemples d'utilisation.
+Sur le GitHub de [raygui](https://github.com/raysan5/raygui), nous pouvons trouver [les différents composants disponibles](https://github.com/raysan5/raygui?tab=readme-ov-file#basic-controls), ainsi que divers programmes pouvant être utile pour réfléchir à l'interface graphique, comme un [éditeur de layout](https://raylibtech.itch.io/rguilayout) ou [d'icones](https://raylibtech.itch.io/rguiicons), et des exemples d'utilisation.
 
-Pour ce que nous allons faire, le plus adapté est un bouton ON/OFF ("toggle"), que l'on peut créer comme suit :
+Pour ce que nous allons faire, le plus adapté est un bouton ON/OFF (« _toggle_ »), que l'on peut créer comme suit :
 
 ```c++
-void RaylibRender::run() {
+void raylibRender::run() {
     while (!WindowShouldClose()) {
         // ...
         BeginDrawing();
@@ -881,7 +1086,7 @@ Le toggle prend en argument un rectangle (la position et la taille du bouton), l
 Pour récupérer la position de la souris, on peut utiliser la fonction `GetMousePosition`, qui renvoie un `Vector2` avec les coordonnées de la souris. On peut alors dessiner un cercle à cette position :
 
 ```c++
-void RaylibRender::run() {
+void raylibRender::run() {
     while (!WindowShouldClose()) {
         // ...
         BeginDrawing();
@@ -902,7 +1107,7 @@ Ce qui nous donne un affichage comme suit :
 |--------------------------------------------------|---------------------------------------------------|
 | ![ex4_camfix.png](QuatriemeExemple/ex4_poff.png) | ![ex4_camlibre.png](QuatriemeExemple/ex4_pon.png) |
 
-> Il est aussi possible de faire [un bouton sans utiliser Raygui](https://www.raylib.com/examples/textures/loader.html?name=textures_sprite_button), mais cela est sensiblement plus complexe.
+> Il est aussi possible de faire [un bouton sans utiliser raygui](https://www.raylib.com/examples/textures/loader.html?name=textures_sprite_button), mais cela est sensiblement plus complexe.
 
 ---
 
@@ -910,7 +1115,7 @@ Ce qui nous donne un affichage comme suit :
 
 ### Un peu de théorie
 
-Le terme "temps réel" représente le fait que le temps (physique) qui s'écoule a une signification dans le programme. Jusqu'ici dans vos programmes, l'utilisateur pouvait attendre 1 ou 10 minutes à l'invite d'un `cin` sans que cela ne change en rien le comportement du programme. Dans un processus "temps réel", le programme continue par contre de s'exécuter, que l'utilisateur agisse ou non. Ceci permet par exemple d'animer de façon réaliste les éléments du monde que l'on représente.
+Le terme « _temps réel_ » représente le fait que le temps (physique) qui s'écoule a une signification dans le programme. Jusqu'ici dans vos programmes, l'utilisateur pouvait attendre 1 ou 10 minutes à l'invite d'un `cin` sans que cela ne change en rien le comportement du programme. Dans un processus « temps réel », le programme continue par contre de s'exécuter, que l'utilisateur agisse ou non. Ceci permet par exemple d'animer de façon réaliste les éléments du monde que l'on représente.
 
 Considérons le cas d'une balle qu'on lâche depuis une certaine hauteur. On pourrait, comme dans l'exercice que vous avez fait au premier semestre, calculer à l'avance le temps au bout duquel la balle touchera le sol. Mais dans une simulation physique en temps réel, on voudrait avoir la position de la balle à chaque instant, par exemple pour pouvoir l'afficher.
 
@@ -918,7 +1123,7 @@ On doit donc pouvoir être capable de décrire à chaque instant la nouvelle pos
 
 Dans une simulation numérique non temps réel, cet intervalle $dt$ est fixé à une valeur arbitraire, aussi petite que la précision de calcul voulue le nécessite (voir cours d'analyse numérique).
 
-Dans un programme "temps réel", c'est par contre la puissance de la machine qui détermine la valeur de $dt$ : plus la scène est complexe à animer et afficher, plus $dt$ sera grand, et plus la simulation sera approximative et l'animation saccadée.
+Dans un programme « temps réel », c'est par contre la puissance de la machine qui détermine la valeur de $dt$ : plus la scène est complexe à animer et afficher, plus $dt$ sera grand, et plus la simulation sera approximative et l'animation saccadée.
 
 > NOTE : La raison pour laquelle on ne fixe pas à l'avance l'intervalle dt est qu'on a a priori aucune idée du temps que prendra le calcul (et l'affichage !) d'une image et, surtout, qu'on n'a aucune garantie que ce temps restera constant : plus il y a d'éléments à prendre en compte, plus ce temps augmentera. On s'en rend bien compte dans certains jeux vidéos : lorsqu'il y a un phénomène complexe (p.ex. une explosion) ou trop d'unités à gérer, c'est le nombre d'images par seconde qui diminue et non le temps qui se dilate.
 
@@ -952,10 +1157,10 @@ private:
 };
 ```
 
-On modifie alors la méthode `run` de `RaylibRender` pour faire évoluer le contenu à chaque itération de la boucle principale :
+On modifie alors la méthode `run` de `raylibRender` pour faire évoluer le contenu à chaque itération de la boucle principale :
 
 ```c++
-void RaylibRender::run() {
+void raylibRender::run() {
     while (!WindowShouldClose()) {
         const auto dt = GetFrameTime();
         c.evolue(dt);
@@ -974,15 +1179,15 @@ void RaylibRender::run() {
 
 On remarque que le dessin est identique au second exemple, le seul changement est que l'on récupère le temps écoulé depuis la dernière image avec `GetFrameTime`, et que l'on fait évoluer le contenu en appelant la méthode `evolue` avec ce temps.
 
-Maintenant, il faut modifier la méthode `dessine` pour prendre en compte l'angle de rotation. On va pour cela utiliser la librairie `rlgl` de Raylib, qui permet de faire des transformations sur les objets 3D par des matrices ([ci-joint](https://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/) un document lié à OpenGl sur le sujet, qui est la librairie sur laquelle est construite Raylib).
+Maintenant, il faut modifier la méthode `dessine` pour prendre en compte l'angle de rotation. On va pour cela utiliser la bibliothèque `rlgl` de raylib, qui permet de faire des transformations sur les objets 3D par des matrices ([ci-joint](https://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/) un document lié à OpenGl sur le sujet, qui est la bibliothèque sur laquelle est construite raylib).
 
 ```c++
 // ...
 #include <rlgl.h>
 // ...
-void RaylibRender::dessine(Contenu const& a_dessiner) {
+void raylibRender::dessine(Contenu const& a_dessiner) {
     Vector3 cubePosition = { 0.0f, 1.0f, 0.0f };
-    
+
     rlPushMatrix();
     rlRotatef(static_cast<float>(a_dessiner.get_angle()), 0.0f, 1.0f, 0.0f);
     DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, LIME);
@@ -1002,16 +1207,16 @@ On devrait alors avoir :
 
 ## Sixième exemple : ajout d'objets plus complexes
 
-Comme pour l'exemple précédent, nous allons repartir de l'exemple 2. Le but de cet exemple est de montrer comment ajouter un modèle 3D plus complexe, que ce soit fait via un logiciel de modélisation 3D ou en utilisant un modèle déjà existant. 
+Comme pour l'exemple précédent, nous allons repartir de l'exemple 2. Le but de cet exemple est de montrer comment ajouter un modèle 3D plus complexe, que ce soit fait via un logiciel de modélisation 3D ou en utilisant un modèle déjà existant.
 
 > Dans notre cas, nous avons juste utilisé un modèle par défaut de [Blender](https://www.blender.org/) que l'on a texturé (il existe de nombreuses ressources en ligne pour apprendre ce logiciel si la curiosité vous y pousse, tel que ce [tutoriel](https://www.youtube.com/watch?v=B0J27sf9N1Y&list=PLjEaoINr3zgEPv5y--4MKpciLaoQYZB1Z)).
 > ![ex6_blender.png](SixiemeExemple/ex6_blender.png)
 
-Pour commencer, nous allons ajouter à notre classe `RaylibRender` un attribut pour le modèle 3D que nous allons charger :
+Pour commencer, nous allons ajouter à notre classe `raylibRender` un attribut pour le modèle 3D que nous allons charger :
 
 ```c++
 // ...
-class RaylibRender final : public SupportADessin {
+class raylibRender final : public SupportADessin {
     // ...
 private:
     // ...
@@ -1019,15 +1224,15 @@ private:
 };
 ```
 
-Puis pour pouvoir utiliser ce modèle, nous devons le charger dans le constructeur de `RaylibRender` (et l'enlever dans le destructeur) :
+Puis pour pouvoir utiliser ce modèle, nous devons le charger dans le constructeur de `raylibRender` (et l'enlever dans le destructeur) :
 
 ```c++
-RaylibRender::RaylibRender() {
+raylibRender::raylibRender() {
     // ...
     myModel = LoadModel("ressources/monkey.glb");
 }
 
-RaylibRender::~RaylibRender() {
+raylibRender::~raylibRender() {
     UnloadModel(myModel);
     CloseWindow();
 }
@@ -1040,16 +1245,16 @@ RaylibRender::~RaylibRender() {
 
 Le chemin `ressources/monkey.glb` est celui que l'on a paramétré dans le CMake (voir [Installation et compilation](#installation-et-compilation)).
 
-Pour le dessiner, il suffit d'utiliser la méthode `DrawModel` de Raylib, qui prend en paramètre le modèle à dessiner, sa position, sa taille et sa couleur en cas d'absence de texture :
+Pour le dessiner, il suffit d'utiliser la méthode `DrawModel` de raylib, qui prend en paramètre le modèle à dessiner, sa position, sa taille et sa couleur en cas d'absence de texture :
 
 ```c++
-void RaylibRender::dessine(Contenu const& a_dessiner) {
+void raylibRender::dessine(Contenu const& a_dessiner) {
     Vector3 modelPosition = { 0.0f, 1.0f, 0.0f };
     DrawModel(myModel, modelPosition, 1.0f, WHITE);
 }
 ```
 
-> On trouvera [ici](https://www.raylib.com/examples/models/loader.html?name=models_loading) les différents types de modèles supportés par Raylib.
+> On trouvera [ici](https://www.raylib.com/examples/models/loader.html?name=models_loading) les différents types de modèles supportés par raylib.
 
 Et on obtient directement (notons qu'il y a le même problème d'éclairage qu'avec le cube, ce qui fait paraitre le modèle très plat !) :
 
@@ -1059,7 +1264,7 @@ Et on obtient directement (notons qu'il y a le même problème d'éclairage qu'a
 
 ## Conclusion
 
-Ce tutoriel ne vise qu'à offrir un aperçu de ce que l'on peut faire avec Raylib, et en général avec des bibliothèques graphiques. Néanmoins, il n'est pas exhaustif et quand on ne sait pas comment faire quelque chose, il ne faut pas hésiter à chercher dans la documentation ou alors parmi les exemples. Il ne faut ainsi surtout pas hésiter à regarder les divers liens proposés au fur et à mesure de ce tutoriel, et toute autre ressource à ce sujet paraissant pertinente.
+Ce tutoriel ne vise qu'à offrir un aperçu de ce que l'on peut faire avec raylib, et en général avec des bibliothèques graphiques. Néanmoins, il n'est pas exhaustif et quand on ne sait pas comment faire quelque chose, il ne faut pas hésiter à chercher dans la documentation ou alors parmi les exemples. Il ne faut ainsi surtout pas hésiter à regarder les divers liens proposés au fur et à mesure de ce tutoriel, et toute autre ressource à ce sujet paraissant pertinente.
 
 ---
 
@@ -1127,7 +1332,7 @@ produisant une animation comme suit :
 
 On trouve des similarités entre chacun de ces outils, avec par exemple quels concepts permettent quelles configurations, comment structurer un code quand on a une idée graphique en tête, etc.
 
-Le choix de Raylib est aussi en quelque sorte dans cette suite d'idée, car elle fournit déjà un bon nombre de fonctionnalités et permet d'arriver assez vite à des résultats satisfaisants. De plus, si dans des cours passés certains ont pu se familiariser avec d'autres bibliothèques graphiques tel que [`pygame`](https://www.pygame.org), des similarités seront évidentes, en comparant ce code issu de la documentation de `pygame` avec ceux que l'on a fait avec Raylib :
+Le choix de raylib est aussi en quelque sorte dans cette suite d'idée, car elle fournit déjà un bon nombre de fonctionnalités et permet d'arriver assez vite à des résultats satisfaisants. De plus, si dans des cours passés certains ont pu se familiariser avec d'autres bibliothèques graphiques tel que [`pygame`](https://www.pygame.org), des similarités seront évidentes, en comparant ce code issu de la documentation de `pygame` avec ceux que l'on a fait avec raylib :
 
 ```python
 # Example file showing a circle moving on screen

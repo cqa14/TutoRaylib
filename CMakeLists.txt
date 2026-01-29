@@ -38,7 +38,7 @@ FetchContent_MakeAvailable(raygui)
 # Ajout des exemples
 add_subdirectory(HelloWorld)
 add_subdirectory(PremierExemple)
-add_subdirectory(SecondExemple)
+add_subdirectory(DeuxiemeExemple)
 add_subdirectory(TroisiemeExemple)
 add_subdirectory(QuatriemeExemple)
 add_subdirectory(CinquiemeExemple)

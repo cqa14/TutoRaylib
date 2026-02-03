@@ -10,7 +10,7 @@ Dans la vie courante, il est rare d'intéragir avec un programme directement par
 
 > Il existe de nombreuses autres bibliothèques permettant de créer des interfaces graphiques, comme [Qt](https://qt.io/), [GLFW](https://www.glfw.org/), [OGRE](https://www.ogre3d.org/), [wxWidgets](https://www.wxwidgets.org/), ou encore [SDL](https://www.libsdl.org/), qui ont chacunes leurs avantages et inconvénients, donc il ne faut surtout pas hésiter à regarder s'il y en a une semblant plus adaptée à un projet particulier.
 
-Le document structuré comme suit :
+Le document structuré comme suit :
 
 1. Nous verrons un [exemple simple de création d'une fenêtre](#premier-exemple--prise-en-main), avec un texte et une figure en 2D.
 2. Nous modulariserons le code afin de séparer le contenu à afficher et la manière de l'afficher, et présenterons du même coup un [exemple de dessin 3D](#deuxième-exemple--modularisation-et-dessin-3d).
@@ -94,7 +94,7 @@ FetchContent_MakeAvailable(raygui)
 TODO: déplacer plus loin et faire le lien
 
 
-Considérons une structure de projet comme suit :
+Considérons une structure de projet comme suit :
 
 ```
 .
@@ -186,7 +186,7 @@ add_executable(Exemple6 main_raylib.cpp)
 target_link_libraries(Exemple6 Ex6RayRender)
 ```
 
-Maintenant que le CMake est configuré, on peut l'utiliser pour compiler le projet. Pour cela, il faut se placer dans le dossier `build` et exécuter les commandes suivantes :
+Maintenant que le CMake est configuré, on peut l'utiliser pour compiler le projet. Pour cela, il faut se placer dans le dossier `build` et exécuter les commandes suivantes :
 
 ```sh
 cmake ..
@@ -199,7 +199,7 @@ La commande `cmake ..` va générer les fichiers de construction pour le projet,
 
 Pour exécuter un des exécutables, il suffit de se placer dans le dossier `bin` générer dans celui `build` et d'exécuter la commande `./nom_de_l_executable`.
 
-> Note : la plupart des éditeurs de code permettent de définir des configurations permettant de faire ces builds et exécutions dans un dossier autre, sans devoir passer par le terminal.
+> Note : la plupart des éditeurs de code permettent de définir des configurations permettant de faire ces builds et exécutions dans un dossier autre, sans devoir passer par le terminal.
 
 ---
 
@@ -333,7 +333,7 @@ Cela va :
 - installer raylib si elle n'est pas déjà installée ;
 - compiler votre programme, et créer l'exécutable `bin/exemple1`.
 
-Vous pouvez donc lancer exécutable (`build/bin/exemple1`). Cela devrait ressembler à ceci :
+Vous pouvez donc lancer exécutable (`build/bin/exemple1`). Cela devrait ressembler à ceci :
 
 ![ex1_img.png](PremierExemple/ex1_img.png)
 
@@ -410,10 +410,10 @@ int main()
 
 ## Deuxième exemple : modularisation et dessin 3D
 
-On va maintenant modulariser notre code. Le but ici est de séparer ce que l'on veut visualiser et le contenu de celui-ci. L'idée est d'organiser le programme selon deux grands principes (dit « [_design patterns_](https://fr.wikipedia.org/wiki/Patron_de_conception) ») :
+On va maintenant modulariser notre code. Le but ici est de séparer ce que l'on veut visualiser et le contenu de celui-ci. L'idée est d'organiser le programme selon deux grands principes (dit « [_design patterns_](https://fr.wikipedia.org/wiki/Patron_de_conception) ») :
 
 - clairement séparer trois choses :
-  - la gestion de l'application (le `main` ou le `run`, cf. plus loin) ;
+  - la gestion de l'application (le `main()` ou le `run()`, cf. plus loin) ;
   - le contenu à afficher ;
   - et la façon de l'afficher (dans les différentes formes : affichage à l'écran, texte, dans un fichier, ...) ;
 - avoir une claire distinction entre ce qui doit être affiché, et la manière de le faire sur les différents supports, celle-ci ne devant pas intérferer avec le contenu.
@@ -520,7 +520,7 @@ public:
 };
 ```
 
-Maintenant, pour chaque contenu, il suffit de dériver de la classe `Dessinable` et de redéfinir la méthode `dessine_sur()` comme suit :
+Maintenant, pour chaque contenu, il suffit de dériver de la classe `Dessinable` et de redéfinir la méthode `dessine_sur()` comme suit :
 
 ```c++
 // contenu.h
@@ -669,7 +669,7 @@ target_include_directories(Dessin PUBLIC ${PROJECT_SOURCE_DIR}/DeuxiemeExemple/g
 
 > Quand il n'y a que des fichiers `.h`, il faut spécifier que ce sont des fichiers d'en-tête C++ grace à la propriété `LINKER_LANGUAGE CXX`, sinon on obtient une erreur (confusion avec le C). De plus, pour que d'autres fichiers puissent utiliser cette bibliothèque, il faut ajouter le dossier contenant les fichiers d'en-tête avec `target_include_directories`.
 
-- dans le sous-dossier `DeuxiemeExemple/text` : 
+- dans le sous-dossier `DeuxiemeExemple/text` :
 
 ```cmake
 # text/CMakeLists.txt
@@ -720,7 +720,7 @@ Si on le lance, on a bien dans le terminal :
 
 ### raylib
 
-Pour l'affichage graphique, nous procéderons un peu différemment, et notre `main` ressemblera à ceci :
+Pour l'affichage graphique, nous procéderons un peu différemment : notre `main()` ressemblera à ceci :
 
 ```c++
 // main_raylib.cpp
@@ -734,7 +734,7 @@ int main()
 }
 ```
 
-Ici, nous appelons la méthode `dessine_sur` dans la méthode `run`, et nous avons le contenu qui sera un attribut de la classe `raylibRender`.
+où `raylibRender` est un `SupportADessin` dont la méthode `run()` appelle la méthode `dessine_sur()` ; et le « contenu » sera un attribut de cette classe `raylibRender` :
 
 ```c++
 // raylib_render.h
@@ -744,7 +744,7 @@ Ici, nous appelons la méthode `dessine_sur` dans la méthode `run`, et nous avo
 #include "contenu.h"
 #include <raylib.h>
 
-class raylibRender final : public SupportADessin {
+class raylibRender : public SupportADessin {
 public:
     raylibRender();
     ~raylibRender() override;
@@ -759,40 +759,47 @@ private:
 };
 ```
 
-> Notons que le contenu pourrait être remplacé par un pointeur vers un contenu pour éviter des copies.
+> Notons que le contenu pourrait être remplacé par un pointeur vers un contenu pour éviter des copies. Dans un projet plus large, ce point devra certainement être pris en considération.  
+> Notez aussi la présence d'une `Camera3D`, qui est le moyen de raylib de faire des dessins en 3D. Nous reviendrons sur ce point précis dans notre prochain exemple.
 
-Dans cette partie, nous aborderons aussi le dessin 3D, d'où la caméra mise en attribut de cette classe. Nous allons maintenant préparer les constructeurs et destructeurs afin que nous n'ayons qu'à nous soucier de l'affichage dans la méthode `run`.
+Nous allons maintenant préparer les constructeurs et destructeurs afin que nous n'ayons à nous soucier uniquement de l'affichage dans la méthode `run()`.
 
 ```c++
 // raylib_render.cpp
-raylibRender::raylibRender() {
+
+#include "raylib_render.h"
+
+raylibRender::raylibRender()
+{
     // parmétres de la fenêtre
     SetConfigFlags(FLAG_WINDOW_HIGHDPI);
     InitWindow(800, 600, "Un cube");
 
     // paramétres de la caméra
-    camera.position = (Vector3){ 5.0f, 5.0f, 5.0f };
-    camera.target = (Vector3){ 0.0f, 1.0f, 0.0f };
-    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+    camera.position = { 5.0f, 5.0f, 5.0f };
+    camera.target   = { 0.0f, 1.0f, 0.0f };
+    camera.up = camera.target;
     camera.fovy = 45.0f;
     camera.projection = CAMERA_PERSPECTIVE;
 
     SetTargetFPS(60);
 }
 
-raylibRender::~raylibRender() {
+raylibRender::~raylibRender()
+{
     CloseWindow();
 }
 ```
 
-On notera donc que l'initialisation et la fermeture de la fenêtre sont identiques, mais on y rajoute des paramètres de caméra, comme sa position, le point qu'elle vise (`target`), le vecteur représentant la direction « haut » pour elle (`up`), son champ de vision (`fovy`) et le type de projection.
+On notera donc que l'initialisation et la fermeture de la fenêtre sont identiques à ce que nous avions fait dans le premier exemple ; mais on rajoute ici l'initialisation des paramètres de caméra : sa position, le point qu'elle vise (`target`), le vecteur représentant la direction « haut » pour elle (`up`), son champ de vision (`fovy`) et le type de projection.
 
 > Il est aussi possible de faire [une caméra dans le cas 2D](https://www.raylib.com/examples/core/loader.html?name=core_2d_camera), mais cela ne sera pas abordé ici.
 
-On peut maintenant faire notre fonction `run` afin d'avoir un affichage fonctionnel.
+On peut maintenant écrire la méthode `run()` afin d'avoir un affichage fonctionnel :
 
 ```c++
-void raylibRender::run() {
+void raylibRender::run()
+{
     while (!WindowShouldClose()) {
         BeginDrawing();
             ClearBackground(RAYWHITE);
@@ -808,25 +815,50 @@ void raylibRender::run() {
 }
 ```
 
-Comme dans le premier exemple, on a notre boucle d'exécution où l'on remet un fond blanc avant de dessiner. Néanmoins, nous devons maintenant entrer dans un mode 3D, avec notre caméra en argument, afin de dessiner nos objets. Il ne manque plus qu'à savoir dessiner le contenu, et cela se fait par la méthode dessine.
+Comme dans le premier exemple, on a notre boucle d'exécution où l'on remet un fond blanc avant de dessiner. Néanmoins, afin de dessiner nos objets, nous devons maintenant entrer dans un mode 3D avec la caméra en argument. Il ne manque plus qu'à savoir dessiner le contenu, et cela se fait par la méthode `dessine()`.
 
 ```c++
-void raylibRender::dessine(Contenu const& a_dessiner) {
+void raylibRender::dessine(Contenu const& a_dessiner)
+{
     Vector3 cubePosition = { 0.0f, 1.0f, 0.0f };
     DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, LIME);
     DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, DARKGREEN);
 }
 ```
 
-Le dessin d'un cube se fait alors en appelant la fonction `DrawCube` avec en argument la position de celui-ci, sa largeur, sa hauteur, sa profondeur et sa couleur ([on trouvera ici d'autres exemples de figures 3D](https://www.raylib.com/examples/models/loader.html?name=models_geometric_shapes)).
+Comme pour le mode texte, nous avons simplifié dans cet exemple et dessiné directement un cube. Mais, bien sûr, dans un projet plus complexe ce dessin dépendra des attributs du contenu.
 
-> Notons que les fonctions de raylib, ayant à la base été faite en C, ne prennent pas en paramètre des `vector` de C++, mais des `Vector2` / `Vector3` de raylib, selon le nombre de composantes. Similairement, les arguments sont prévus en `float` et non en double, et certaines erreurs peuvent venir de là et sont donc réglables en forçant la conversion en float.
+Le dessin d'un cube se fait en appelant la fonction `DrawCube()` avec en argument la position de celui-ci, sa largeur, sa hauteur, sa profondeur et sa couleur ([on trouvera ici d'autres exemples de figures 3D](https://www.raylib.com/examples/models/loader.html?name=models_geometric_shapes)).
 
-Nous obtenons alors un affichage 3D, qui ressemble à ceci :
+> Notons que les fonctions de raylib, ayant à la base été faite en C, ne prennent pas en paramètre des `vector` de C++, mais des `Vector2` / `Vector3` de raylib, selon le nombre de composantes. Similairement, les arguments sont prévus en `float` et non en `double`, et certaines erreurs peuvent venir de là et sont donc réglables en forçant la conversion en `float`, p.ex. en ajoutant un `f` comme suffixe aux valeurs littérales.
+
+Pour compiler nous devons :
+
+1. supprimer le commentaire dans le `CMakeLists.txt` du sous-dossier `DeuxiemeExemple` :
+
+```cmake
+add_subdirectory(general)
+add_subdirectory(raylib)
+add_subdirectory(text)
+```
+
+2. créer le `CMakeLists.txt` du sous-dossier `raylib` :
+
+```cmake
+# raylib/CMakeLists.txt
+
+add_library(RayRender raylib_render.h raylib_render.cpp)
+target_link_libraries(RayRender raylib Dessin)
+
+add_executable(exemple2_raylib main_raylib.cpp)
+target_link_libraries(exemple2_raylib RayRender)
+```
+
+Après compilation, on devrait obtenir un affichage 3D qui ressemble à ceci :
 
 ![ex2_img.png](DeuxiemeExemple/ex2_img.png)
 
-Dans les codes ci-dessus, nous utilisons également les fonctions `DrawCubeWires` et `DrawGrid`, qui permettent respectivement de dessiner les contours du cube et une grille au sol afin de mettre en évidence les objets, mais ceci est superflus en soi.
+Dans les codes ci-dessus, nous utilisons également les fonctions `DrawCubeWires()` et `DrawGrid()`, qui permettent respectivement de dessiner les contours du cube et une grille au sol afin de mettre en évidence les objets, mais ceci est superflus en soi.
 
 > Les objets peuvent paraitre très plat, car il n'y a pas de système de lumière par défaut, ni de méthode suffisamment simple pour le présenter ici, ce qui fait qu'il n'y a pas d'ombres par exemple (l'[exemple le plus simple](https://www.raylib.com/examples/shaders/loader.html?name=shaders_basic_lighting) gère l'ombre pour chaque objet, et sinon il faudrait faire un système de « [_shadow mapping_](https://en.wikipedia.org/wiki/Shadow_mapping) »).
 
@@ -838,7 +870,7 @@ Dans les codes ci-dessus, nous utilisons également les fonctions `DrawCubeWires
 
 > Pour les exemples qui suivent, nous nous concentrerons que sur la partie raylib, et nous ne modifierons pas les fichiers `main_raylib.cpp`, `dessinable.h` et `support_a_dessin.h`.
 
-Afin d'avoir un peu d'intérêt à l'exemple, nous modifions les Contenu comme suit :
+Afin d'avoir un peu d'intérêt à l'exemple, nous modifions les Contenu comme suit :
 
 ```c++
 // ...
@@ -870,7 +902,7 @@ private:
 };
 ```
 
-Ceci lui ajoute donc une propriété `position` et une couleur, qui sont toutes deux des attributs de la classe, ainsi qu'un getter et un constructeur. Nous pouvons aussi modifier la déclaration de `raylibRender` afin d'avoir plusieurs contenus à afficher :
+Ceci lui ajoute donc une propriété `position` et une couleur, qui sont toutes deux des attributs de la classe, ainsi qu'un getter et un constructeur. Nous pouvons aussi modifier la déclaration de `raylibRender` afin d'avoir plusieurs contenus à afficher :
 
 ```c++
 // ...
@@ -886,7 +918,7 @@ private:
 };
 ```
 
-La méthode `dessine` a été modifiée pour utiliser les propriétés de `Contenu` :
+La méthode `dessine()` a été modifiée pour utiliser les propriétés de `Contenu` :
 
 ```c++
 void raylibRender::dessine(Contenu const& a_dessiner) {
@@ -913,7 +945,7 @@ void raylibRender::dessine(Contenu const& a_dessiner) {
 
 La formulation `const auto [x, y, z] = a_dessiner.get_position();` permet de décomposer le `Position` en trois variables `x`, `y` et `z` automatiquement. De plus, pour la position, on doit forcer la conversion en `float` pour éviter des erreurs de compilation, ceci via le `static_cast<float>(...)`.
 
-Finalement, on veut afficher chaque cube dans la méthode `run`, et pour cela, on peut faire une boucle sur la liste des contenus :
+Finalement, on veut afficher chaque cube dans la méthode `run()`, et pour cela, on peut faire une boucle sur la liste des contenus :
 
 ```c++
 void raylibRender::run() {
@@ -930,7 +962,7 @@ void raylibRender::run() {
 }
 ```
 
-Si l'on veut permettre le movement de la caméra, il suffit d'ajouter la fonction `UpdateCamera` de raylib :
+Si l'on veut permettre le movement de la caméra, il suffit d'ajouter la fonction `UpdateCamera()` de raylib :
 
 ```c++
 void raylibRender::run() {
@@ -950,7 +982,7 @@ void raylibRender::run() {
 
 `UpdateCamera` prend en paramètre la caméra à mettre à jour et le type de mouvement, ici [`CAMERA_FREE`](https://www.raylib.com/examples/core/loader.html?name=core_3d_camera_free), qui gére le mouvement via la souris et les touches `W`, `A`, `S` et `D` (d'autres modes de mouvement sont présentés [ici](https://www.raylib.com/examples/core/loader.html?name=core_3d_camera_first_person)).
 
-L'affichage final ressemble donc à ceci :
+L'affichage final ressemble donc à ceci :
 
 ![ex3_img.png](TroisiemeExemple/ex3_img.png)
 
@@ -958,13 +990,13 @@ L'affichage final ressemble donc à ceci :
 
 ## Quatrième exemple : interactivité (souris, clavier, boutons, ...)
 
-Dans ce quatrième exemple, nous allons voir trois interactions possibles :
+Dans ce quatrième exemple, nous allons voir trois interactions possibles :
 
-- le clavier : utiliser une touche pour activer ou non le déplacement de la caméra ;
-- la souris : récupérer sa position et l'utiliser pour y dessiner un objet ;
-- raygui : utiliser un bouton pour activer une fonctionalité.
+- le clavier : utiliser une touche pour activer ou non le déplacement de la caméra ;
+- la souris : récupérer sa position et l'utiliser pour y dessiner un objet ;
+- raygui : utiliser un bouton pour activer une fonctionalité.
 
-Nous allons faire un pointeur rouge qui suit la souris, activable par un bouton. Pour cela, nous devons ajouter deux attributs à la classe `raylibRender` pour gérer l'état (actif ou non) du mouvement de la caméra et du pointeur :
+Nous allons faire un pointeur rouge qui suit la souris, activable par un bouton. Pour cela, nous devons ajouter deux attributs à la classe `raylibRender` pour gérer l'état (actif ou non) du mouvement de la caméra et du pointeur :
 
 ```c++
 // ...
@@ -977,7 +1009,7 @@ private:
 };
 ```
 
-On va commencer par activé le déplacement avec la touche `L`. Pour cela, dans notre boucle principale, on va vérifier si la touche `L` est pressée, et si oui, on va changer l'état du déplacement :
+On va commencer par activé le déplacement avec la touche `L`. Pour cela, dans notre boucle principale, on va vérifier si la touche `L` est pressée, et si oui, on va changer l'état du déplacement :
 
 ```c++
 void raylibRender::run() {
@@ -990,7 +1022,7 @@ void raylibRender::run() {
 }
 ```
 
-Ensuite, on va mettre à jour la caméra seulement si le déplacement est activé :
+Ensuite, on va mettre à jour la caméra seulement si le déplacement est activé :
 
 ```c++
 void raylibRender::run() {
@@ -1006,7 +1038,7 @@ void raylibRender::run() {
 }
 ```
 
-Et on peut ajouter un message à l'écran pour indiquer si le déplacement est activé ou non :
+Et on peut ajouter un message à l'écran pour indiquer si le déplacement est activé ou non :
 
 ```c++
 void raylibRender::run() {
@@ -1038,7 +1070,7 @@ Pour que le texte soit correctement visible, on ne le dessine pas dans le mode 3
 |----------------------------------------------------|--------------------------------------------------------|
 | ![ex4_camfix.png](QuatriemeExemple/ex4_camfix.png) | ![ex4_camlibre.png](QuatriemeExemple/ex4_camlibre.png) |
 
-Nous allons maintenant voir comment ajouter un bouton. Pour cela, nous allons utiliser la bibliothèque raygui, que l'on importe comme suit :
+Nous allons maintenant voir comment ajouter un bouton. Pour cela, nous allons utiliser la bibliothèque raygui, que l'on importe comme suit :
 
 ```c++
 // raylib_render.cpp
@@ -1053,7 +1085,7 @@ Nous allons maintenant voir comment ajouter un bouton. Pour cela, nous allons ut
 
 Sur le GitHub de [raygui](https://github.com/raysan5/raygui), nous pouvons trouver [les différents composants disponibles](https://github.com/raysan5/raygui?tab=readme-ov-file#basic-controls), ainsi que divers programmes pouvant être utile pour réfléchir à l'interface graphique, comme un [éditeur de layout](https://raylibtech.itch.io/rguilayout) ou [d'icones](https://raylibtech.itch.io/rguiicons), et des exemples d'utilisation.
 
-Pour ce que nous allons faire, le plus adapté est un bouton ON/OFF (« _toggle_ »), que l'on peut créer comme suit :
+Pour ce que nous allons faire, le plus adapté est un bouton ON/OFF (« _toggle_ »), que l'on peut créer comme suit :
 
 ```c++
 void raylibRender::run() {
@@ -1069,7 +1101,7 @@ void raylibRender::run() {
 
 Le toggle prend en argument un rectangle (la position et la taille du bouton), le texte à afficher et un pointeur vers une variable booléenne qui va changer d'état lorsque l'on clique sur le bouton.
 
-> Pour un bouton classique, l'utilisation est un peu différente :
+> Pour un bouton classique, l'utilisation est un peu différente :
 > ```c++
 > while (!WindowShouldClose()) {
 >       // ...
@@ -1083,7 +1115,7 @@ Le toggle prend en argument un rectangle (la position et la taille du bouton), l
 > ```
 > Donc il ne faut pas hésiter à chercher comment s'utilise un composant avant de l'utiliser.
 
-Pour récupérer la position de la souris, on peut utiliser la fonction `GetMousePosition`, qui renvoie un `Vector2` avec les coordonnées de la souris. On peut alors dessiner un cercle à cette position :
+Pour récupérer la position de la souris, on peut utiliser la fonction `GetMousePosition()`, qui renvoie un `Vector2` avec les coordonnées de la souris. On peut alors dessiner un cercle à cette position :
 
 ```c++
 void raylibRender::run() {
@@ -1101,7 +1133,7 @@ void raylibRender::run() {
 }
 ```
 
-Ce qui nous donne un affichage comme suit :
+Ce qui nous donne un affichage comme suit :
 
 | Pointeur OFF                                     | Pointeur ON                                       |
 |--------------------------------------------------|---------------------------------------------------|
@@ -1125,14 +1157,14 @@ Dans une simulation numérique non temps réel, cet intervalle $dt$ est fixé à
 
 Dans un programme « temps réel », c'est par contre la puissance de la machine qui détermine la valeur de $dt$ : plus la scène est complexe à animer et afficher, plus $dt$ sera grand, et plus la simulation sera approximative et l'animation saccadée.
 
-> NOTE : La raison pour laquelle on ne fixe pas à l'avance l'intervalle dt est qu'on a a priori aucune idée du temps que prendra le calcul (et l'affichage !) d'une image et, surtout, qu'on n'a aucune garantie que ce temps restera constant : plus il y a d'éléments à prendre en compte, plus ce temps augmentera. On s'en rend bien compte dans certains jeux vidéos : lorsqu'il y a un phénomène complexe (p.ex. une explosion) ou trop d'unités à gérer, c'est le nombre d'images par seconde qui diminue et non le temps qui se dilate.
+> NOTE : La raison pour laquelle on ne fixe pas à l'avance l'intervalle dt est qu'on a a priori aucune idée du temps que prendra le calcul (et l'affichage !) d'une image et, surtout, qu'on n'a aucune garantie que ce temps restera constant : plus il y a d'éléments à prendre en compte, plus ce temps augmentera. On s'en rend bien compte dans certains jeux vidéos : lorsqu'il y a un phénomène complexe (p.ex. une explosion) ou trop d'unités à gérer, c'est le nombre d'images par seconde qui diminue et non le temps qui se dilate.
 
 Concrètement, $dt$ est donné par l'écart entre l'image précédente et l'image actuelle, et il est calculé à chaque itération de la boucle principale du programme.
 
-La simulation est donc une boucle qui répète en permanence plusieurs étapes, parmi lesquelles :
+La simulation est donc une boucle qui répète en permanence plusieurs étapes, parmi lesquelles :
 
-1. Calcul (ou mise à jour) : on détermine l'état suivant du système, à partir de l'état courant et du pas de temps $dt$ ; c'est dans cette phase que dans votre projet interviendront les équations de la simulation ;
-2. Affichage à l'écran (ou sur tout autre support à dessin) : on envoie les données vers la carte vidéo (ou sur cin ou dans un fichier, etc.) ;
+1. Calcul (ou mise à jour) : on détermine l'état suivant du système, à partir de l'état courant et du pas de temps $dt$ ; c'est dans cette phase que dans votre projet interviendront les équations de la simulation ;
+2. Affichage à l'écran (ou sur tout autre support à dessin) : on envoie les données vers la carte vidéo (ou sur cin ou dans un fichier, etc.) ;
 3. Gestion des interactions (clavier, souris).
 
 En théorie, aucun calcul concernant la simulation n'est à effectuer dans ces deux dernières phases.
@@ -1141,7 +1173,7 @@ Enfin, lorsqu'une certaine condition d'arrêt est atteinte (p.ex. un certain dé
 
 ### L'exemple
 
-Pour cet exemple, nous repartons des fichiers de [l'exemple 2](#deuxième-exemple--modularisation-et-dessin-3d), et nous modifions le Contenu afin qu'il ait un angle de rotation, un getter, ainsi qu'une méthode faisant évoluer cet angle pendant `dt` :
+Pour cet exemple, nous repartons des fichiers de [l'exemple 2](#deuxième-exemple--modularisation-et-dessin-3d), et nous modifions le Contenu afin qu'il ait un angle de rotation, un getter, ainsi qu'une méthode faisant évoluer cet angle pendant `dt` :
 
 ```c++
 class Contenu final : public Dessinable {
@@ -1157,7 +1189,7 @@ private:
 };
 ```
 
-On modifie alors la méthode `run` de `raylibRender` pour faire évoluer le contenu à chaque itération de la boucle principale :
+On modifie alors la méthode `run()` de `raylibRender` pour faire évoluer le contenu à chaque itération de la boucle principale :
 
 ```c++
 void raylibRender::run() {
@@ -1177,9 +1209,9 @@ void raylibRender::run() {
 }
 ```
 
-On remarque que le dessin est identique au second exemple, le seul changement est que l'on récupère le temps écoulé depuis la dernière image avec `GetFrameTime`, et que l'on fait évoluer le contenu en appelant la méthode `evolue` avec ce temps.
+On remarque que le dessin est identique au second exemple, le seul changement est que l'on récupère le temps écoulé depuis la dernière image avec `GetFrameTime`, et que l'on fait évoluer le contenu en appelant la méthode `evolue()` avec ce temps.
 
-Maintenant, il faut modifier la méthode `dessine` pour prendre en compte l'angle de rotation. On va pour cela utiliser la bibliothèque `rlgl` de raylib, qui permet de faire des transformations sur les objets 3D par des matrices ([ci-joint](https://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/) un document lié à OpenGl sur le sujet, qui est la bibliothèque sur laquelle est construite raylib).
+Maintenant, il faut modifier la méthode `dessine()` pour prendre en compte l'angle de rotation. On va pour cela utiliser la bibliothèque `rlgl` de raylib, qui permet de faire des transformations sur les objets 3D par des matrices ([ci-joint](https://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/) un document lié à OpenGl sur le sujet, qui est la bibliothèque sur laquelle est construite raylib).
 
 ```c++
 // ...
@@ -1198,9 +1230,9 @@ void raylibRender::dessine(Contenu const& a_dessiner) {
 
 > Si l'on désirait seulement mettre à jour la position du cube, il suffirait de changer son vecteur de position sans se soucier de ces transformations.
 
-Décortiquons ce qui se passe. La fonction `rlPushMatrix` commence les transformations qui seront appliquées jusqu'à l'appel de `rlPopMatrix`. On applique ensuite celles que l'on veut effectuer, ici une rotation autour de l'axe Y, avec `rlRotatef`, qui prend en paramètre l'angle de rotation (en degrés) et les coordonnées de l'axe de rotation (on trouvera [ici](https://www.raylib.com/examples/models/loader.html?name=models_rlgl_solar_system) un exemple plus complexe ainsi que d'autres possibilités offertes par `rlgl`).
+Décortiquons ce qui se passe. La fonction `rlPushMatrix()` commence les transformations qui seront appliquées jusqu'à l'appel de `rlPopMatrix`. On applique ensuite celles que l'on veut effectuer, ici une rotation autour de l'axe Y, avec `rlRotatef`, qui prend en paramètre l'angle de rotation (en degrés) et les coordonnées de l'axe de rotation (on trouvera [ici](https://www.raylib.com/examples/models/loader.html?name=models_rlgl_solar_system) un exemple plus complexe ainsi que d'autres possibilités offertes par `rlgl`).
 
-On devrait alors avoir :
+On devrait alors avoir :
 ![ex5_img.png](CinquiemeExemple/ex5_img.png)
 
 ---
@@ -1212,7 +1244,7 @@ Comme pour l'exemple précédent, nous allons repartir de l'exemple 2. Le but de
 > Dans notre cas, nous avons juste utilisé un modèle par défaut de [Blender](https://www.blender.org/) que l'on a texturé (il existe de nombreuses ressources en ligne pour apprendre ce logiciel si la curiosité vous y pousse, tel que ce [tutoriel](https://www.youtube.com/watch?v=B0J27sf9N1Y&list=PLjEaoINr3zgEPv5y--4MKpciLaoQYZB1Z)).
 > ![ex6_blender.png](SixiemeExemple/ex6_blender.png)
 
-Pour commencer, nous allons ajouter à notre classe `raylibRender` un attribut pour le modèle 3D que nous allons charger :
+Pour commencer, nous allons ajouter à notre classe `raylibRender` un attribut pour le modèle 3D que nous allons charger :
 
 ```c++
 // ...
@@ -1224,7 +1256,7 @@ private:
 };
 ```
 
-Puis pour pouvoir utiliser ce modèle, nous devons le charger dans le constructeur de `raylibRender` (et l'enlever dans le destructeur) :
+Puis pour pouvoir utiliser ce modèle, nous devons le charger dans le constructeur de `raylibRender` (et l'enlever dans le destructeur) :
 
 ```c++
 raylibRender::raylibRender() {
@@ -1238,14 +1270,14 @@ raylibRender::~raylibRender() {
 }
 ```
 
-> Si le modèle n'est pas à l'endroit, on peut utiliser  :
+> Si le modèle n'est pas à l'endroit, on peut utiliser :
 > ```
 >  myModel.transform = MatrixRotateXYZ((Vector3){DEG2RAD * AngleX, DEG2RAD * AngleY, DEG2RAD * AngleZ});
 > ```
 
 Le chemin `ressources/monkey.glb` est celui que l'on a paramétré dans le CMake (voir [Installation et compilation](#installation-et-compilation)).
 
-Pour le dessiner, il suffit d'utiliser la méthode `DrawModel` de raylib, qui prend en paramètre le modèle à dessiner, sa position, sa taille et sa couleur en cas d'absence de texture :
+Pour le dessiner, il suffit d'utiliser la méthode `DrawModel()` de raylib, qui prend en paramètre le modèle à dessiner, sa position, sa taille et sa couleur en cas d'absence de texture :
 
 ```c++
 void raylibRender::dessine(Contenu const& a_dessiner) {
@@ -1256,7 +1288,7 @@ void raylibRender::dessine(Contenu const& a_dessiner) {
 
 > On trouvera [ici](https://www.raylib.com/examples/models/loader.html?name=models_loading) les différents types de modèles supportés par raylib.
 
-Et on obtient directement (notons qu'il y a le même problème d'éclairage qu'avec le cube, ce qui fait paraitre le modèle très plat !) :
+Et on obtient directement (notons qu'il y a le même problème d'éclairage qu'avec le cube, ce qui fait paraitre le modèle très plat !) :
 
 ![ex6_img.png](SixiemeExemple/ex6_img.png)
 
@@ -1270,7 +1302,7 @@ Ce tutoriel ne vise qu'à offrir un aperçu de ce que l'on peut faire avec rayli
 
 ## Annexe : Pourquoi apprendre à utiliser une bibliothèque graphique ?
 
-Dans le cadre des études de mathématiques ou de physique, il peut paraitre superflu d'apprendre à utiliser une bibliothèque graphique, car on ne vise pas à développer des applications ou des jeux vidéos. Néanmoins, les compétences acquises dans ce domaine peuvent facilement être transposées pour d'autres cas d'usages. Par exemple, pour visualiser des données, on retrouvera des patterns assez similaires à ceux présentés :
+Dans le cadre des études de mathématiques ou de physique, il peut paraitre superflu d'apprendre à utiliser une bibliothèque graphique, car on ne vise pas à développer des applications ou des jeux vidéos. Néanmoins, les compétences acquises dans ce domaine peuvent facilement être transposées pour d'autres cas d'usages. Par exemple, pour visualiser des données, on retrouvera des patterns assez similaires à ceux présentés :
 
 ```python
 import matplotlib.pyplot as plt
@@ -1291,7 +1323,7 @@ ax.legend(fontsize=14)
 plt.show()
 ```
 
-afin de produire un graphique comme suit via le module [`matplotlib`](https://matplotlib.org/) de Python :
+afin de produire un graphique comme suit via le module [`matplotlib`](https://matplotlib.org/) de Python :
 
 ![mpl.png](mpl.png)
 
@@ -1326,13 +1358,13 @@ class FollowingGraphCamera(MovingCameraScene):
         self.play(Restore(self.camera.frame))
 ```
 
-produisant une animation comme suit :
+produisant une animation comme suit :
 
 ![manim.gif](manim.gif)
 
 On trouve des similarités entre chacun de ces outils, avec par exemple quels concepts permettent quelles configurations, comment structurer un code quand on a une idée graphique en tête, etc.
 
-Le choix de raylib est aussi en quelque sorte dans cette suite d'idée, car elle fournit déjà un bon nombre de fonctionnalités et permet d'arriver assez vite à des résultats satisfaisants. De plus, si dans des cours passés certains ont pu se familiariser avec d'autres bibliothèques graphiques tel que [`pygame`](https://www.pygame.org), des similarités seront évidentes, en comparant ce code issu de la documentation de `pygame` avec ceux que l'on a fait avec raylib :
+Le choix de raylib est aussi en quelque sorte dans cette suite d'idée, car elle fournit déjà un bon nombre de fonctionnalités et permet d'arriver assez vite à des résultats satisfaisants. De plus, si dans des cours passés certains ont pu se familiariser avec d'autres bibliothèques graphiques tel que [`pygame`](https://www.pygame.org), des similarités seront évidentes, en comparant ce code issu de la documentation de `pygame` avec ceux que l'on a fait avec raylib :
 
 ```python
 # Example file showing a circle moving on screen

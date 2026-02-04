@@ -1167,7 +1167,7 @@ void raylibRender::run() {
 ```
 
 
-Pour compiler, comme raygui est un fichier d'en-tête, il faut inclure son dossier dans les endroits où chercher. On utilise pour cela la commande `target_include_directories`. Il **ne** faut par ailleurs **pas** utiliser ici les options de compilation `${PROJECT_WARNING_FLAGS}` qui génèreront bien trop de warnings en raison du C de raygui :
+Pour compiler, comme raygui est un fichier d'en-tête, il faut inclure son dossier dans les endroits où chercher. On utilise pour cela la commande `target_include_directories`. Par contre, il **ne** faut par ailleurs **pas** utiliser ici les options de compilation `${PROJECT_WARNING_FLAGS}` qui génèreront bien trop de warnings en raison du C de raygui :
 
 ```cmake
 # QuatriemeExemple/raylib/CMakeLists.txt
@@ -1203,25 +1203,25 @@ L'exécutable devrait alors donner un affichage comme suit :
 
 ### Un peu de théorie
 
-Le terme « _temps réel_ » représente le fait que le temps (physique) qui s'écoule a une signification dans le programme. Jusqu'ici dans vos programmes, l'utilisateur pouvait attendre 1 ou 10 minutes à l'invite d'un `cin` sans que cela ne change en rien le comportement du programme. Dans un processus « temps réel », le programme continue par contre de s'exécuter, que l'utilisateur agisse ou non. Ceci permet par exemple d'animer de façon réaliste les éléments du monde que l'on représente.
+Le terme « _temps réel_ » représente le fait que le temps (physique) qui s'écoule a une signification dans le programme. Jusqu'ici dans vos programmes, l'utilisateur pouvait attendre 1 seconde ou 10 minutes à l'invite d'un `cin` sans que cela ne change en rien le comportement du programme. Dans un processus « temps réel », le programme continue par contre d'effectuer des actions représentant l'écoulement du temps physique, que l'utilisateur agisse ou non. Ceci permet par exemple d'animer de façon réaliste les éléments du monde que l'on représente.
 
 Considérons le cas d'une balle qu'on lâche depuis une certaine hauteur. On pourrait, comme dans l'exercice que vous avez fait au premier semestre, calculer à l'avance le temps au bout duquel la balle touchera le sol. Mais dans une simulation physique en temps réel, on voudrait avoir la position de la balle à chaque instant, par exemple pour pouvoir l'afficher.
 
-On doit donc pouvoir être capable de décrire à chaque instant la nouvelle position de la balle en fonction de la position précédente et du temps dt écoulé entre deux calculs. Ce temps est simplement le temps que l'ordinateur a mis pour calculer et afficher la dernière position.
+On doit donc pouvoir être capable de décrire à chaque instant la nouvelle position de la balle en fonction de la position précédente et du temps écoulé entre deux calculs. Ce temps est simplement le temps que l'ordinateur a mis pour calculer et afficher la dernière position.
 
-Dans une simulation numérique non temps réel, cet intervalle $dt$ est fixé à une valeur arbitraire, aussi petite que la précision de calcul voulue le nécessite (voir cours d'analyse numérique).
+Dans une simulation numérique non temps réel, cet intervalle de temps $dt$ est fixé à une valeur arbitraire, aussi petite que la précision de calcul voulue le nécessite (voir cours d'analyse numérique).
 
 Dans un programme « temps réel », c'est par contre la puissance de la machine qui détermine la valeur de $dt$ : plus la scène est complexe à animer et afficher, plus $dt$ sera grand, et plus la simulation sera approximative et l'animation saccadée.
 
-> NOTE : La raison pour laquelle on ne fixe pas à l'avance l'intervalle dt est qu'on a a priori aucune idée du temps que prendra le calcul (et l'affichage !) d'une image et, surtout, qu'on n'a aucune garantie que ce temps restera constant : plus il y a d'éléments à prendre en compte, plus ce temps augmentera. On s'en rend bien compte dans certains jeux vidéos : lorsqu'il y a un phénomène complexe (p.ex. une explosion) ou trop d'unités à gérer, c'est le nombre d'images par seconde qui diminue et non le temps qui se dilate.
+> NOTE : La raison pour laquelle on ne fixe pas à l'avance l'intervalle $dt$ est qu'on a _a priori_ aucune idée du temps que prendra le calcul (et l'affichage !) d'une image et, surtout, qu'on n'a aucune garantie que ce temps restera constant : plus il y a d'éléments à prendre en compte, plus ce temps augmentera. On s'en rend bien compte dans certains jeux vidéos : lorsqu'il y a un phénomène complexe (p.ex. une explosion) ou trop d'unités à gérer, c'est le nombre d'images par seconde qui diminue et non le temps qui se dilate.
 
 Concrètement, $dt$ est donné par l'écart entre l'image précédente et l'image actuelle, et il est calculé à chaque itération de la boucle principale du programme.
 
 La simulation est donc une boucle qui répète en permanence plusieurs étapes, parmi lesquelles :
 
-1. Calcul (ou mise à jour) : on détermine l'état suivant du système, à partir de l'état courant et du pas de temps $dt$ ; c'est dans cette phase que dans votre projet interviendront les équations de la simulation ;
-2. Affichage à l'écran (ou sur tout autre support à dessin) : on envoie les données vers la carte vidéo (ou sur cin ou dans un fichier, etc.) ;
-3. Gestion des interactions (clavier, souris).
+1. calcul (ou mise à jour) : on détermine l'état suivant du système, à partir de l'état courant et du pas de temps $dt$ ; c'est dans cette phase que dans votre projet interviendront les équations de la simulation ;
+2. affichage à l'écran (ou sur tout autre support à dessin) : on envoie les données vers la carte vidéo (ou sur `cin` ou dans un fichier, etc.) ;
+3. gestion des interactions (clavier, souris).
 
 En théorie, aucun calcul concernant la simulation n'est à effectuer dans ces deux dernières phases.
 
@@ -1229,23 +1229,35 @@ Enfin, lorsqu'une certaine condition d'arrêt est atteinte (p.ex. un certain dé
 
 ### L'exemple
 
-Pour cet exemple, nous repartons des fichiers de [l'exemple 2](#deuxième-exemple--modularisation-et-dessin-3d), et nous modifions le Contenu afin qu'il ait un angle de rotation, un getter, ainsi qu'une méthode faisant évoluer cet angle pendant `dt` :
+Pour cet exemple, nous repartons des fichiers de [l'exemple 2](#deuxième-exemple--modularisation-et-dessin-3d), et nous modifions le Contenu afin qu'il ait un angle de rotation, ainsi qu'une méthode faisant évoluer cet angle pendant `dt`.
+
+> Vous pouvez donc, comme pour le troisième exemple, repartir du deuxième exemple, puis éditer les fichiers modifiés ; p.ex. sous Unix :
+> ```sh
+> mkdir CinquiemeExemple
+> cp -r DeuxiemeExemple/CMakeLists.txt DeuxiemeExemple/general DeuxiemeExemple/raylib CinquiemeExemple
+> ```
+> puis éditez les `CMakeLists.txt` comme d'habitude.
+
+
+Dans `general/contenu.h` :
 
 ```c++
 class Contenu : public Dessinable {
 public:
     // ...
+    Contenu(double a = 0.0) : angle(a) {}
+
+    // ...
+
     double get_angle() const { return angle; }
 
-    void evolue(const double dt) {
-        angle += 10*dt;
-    }
+    void evolue(double dt) { angle += 10.0 * dt; }
 private:
-    double angle = 0;
+    double angle;
 };
 ```
 
-On modifie alors la méthode `run()` de `raylibRender` pour faire évoluer le contenu à chaque itération de la boucle principale :
+On modifie ensuite la méthode `run()` de `raylibRender` pour faire évoluer le contenu à chaque itération de la boucle principale :
 
 ```c++
 void raylibRender::run() {
@@ -1254,41 +1266,34 @@ void raylibRender::run() {
         c.evolue(dt);
 
         BeginDrawing();
-            ClearBackground(RAYWHITE);
-            BeginMode3D(camera);
-                DrawGrid(200, 0.5f);
-
-                c.dessine_sur(*this);
-            EndMode3D();
-        EndDrawing();
-    }
+        // ...
 }
 ```
 
-On remarque que le dessin est identique au deuxième exemple, le seul changement est que l'on récupère le temps écoulé depuis la dernière image avec `GetFrameTime`, et que l'on fait évoluer le contenu en appelant la méthode `evolue()` avec ce temps.
+Le seul changement par rapport au deuxième exemple est que l'on récupère le temps écoulé depuis la dernière image avec `GetFrameTime()`, et que l'on fait évoluer le contenu en appelant la méthode `evolue()` avec ce temps.
 
-Maintenant, il faut modifier la méthode `dessine()` pour prendre en compte l'angle de rotation. On va pour cela utiliser la bibliothèque `rlgl` de raylib, qui permet de faire des transformations sur les objets 3D par des matrices ([ci-joint](https://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/) un document lié à OpenGl sur le sujet, qui est la bibliothèque sur laquelle est construite raylib).
+Par ailleurs, il faut aussi modifier la méthode `dessine()` pour prendre en compte l'angle de rotation. On va pour cela utiliser la bibliothèque `rlgl` de raylib, qui permet de faire des transformations sur les objets 3D par des matrices (voir [ce document](https://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/) d'OpenGl sur le sujet ; OpenGL est la bibliothèque sur laquelle est construite raylib).
 
 ```c++
 // ...
 #include <rlgl.h>
 // ...
 void raylibRender::dessine(Contenu const& a_dessiner) {
-    Vector3 cubePosition = { 0.0f, 1.0f, 0.0f };
+    Vector3 position = { 0.0f, 1.0f, 0.0f };
 
     rlPushMatrix();
     rlRotatef(static_cast<float>(a_dessiner.get_angle()), 0.0f, 1.0f, 0.0f);
-    DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, LIME);
-    DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, DARKGREEN);
+    DrawCube(position, 2.0f, 2.0f, 2.0f, LIME);
+    DrawCubeWires(position, 2.0f, 2.0f, 2.0f, DARKGREEN);
     rlPopMatrix();
 }
 ```
 
-> Si l'on désirait seulement mettre à jour la position du cube, il suffirait de changer son vecteur de position sans se soucier de ces transformations.
+> Si l'on désirait seulement mettre à jour la _position_ du cube, il suffirait simplement de changer son vecteur de position sans se soucier de ces transformations (rotation ici).
 
-Décortiquons ce qui se passe. La fonction `rlPushMatrix()` commence les transformations qui seront appliquées jusqu'à l'appel de `rlPopMatrix`. On applique ensuite celles que l'on veut effectuer, ici une rotation autour de l'axe Y, avec `rlRotatef`, qui prend en paramètre l'angle de rotation (en degrés) et les coordonnées de l'axe de rotation (on trouvera [ici](https://www.raylib.com/examples/models/loader.html?name=models_rlgl_solar_system) un exemple plus complexe ainsi que d'autres possibilités offertes par `rlgl`).
+Décortiquons ce qui se passe. La fonction `rlPushMatrix()` commence les transformations qui seront appliquées jusqu'à l'appel de `rlPopMatrix()`. On applique ensuite celles que l'on veut effectuer, ici une rotation autour de l'axe Y, avec `rlRotatef()`, qui prend en paramètre l'angle de rotation (en degrés) et les coordonnées de l'axe de rotation (on trouvera [ici](https://www.raylib.com/examples/models/loader.html?name=models_rlgl_solar_system) un exemple plus complexe, ainsi que d'autres possibilités offertes par `rlgl`).
 
-On devrait alors avoir :
+Après compilation, on devrait alors avoir un cube qui tourne :
 ![ex5_img.png](CinquiemeExemple/ex5_img.png)
 
 ---

@@ -36,7 +36,7 @@ void RaylibRender::run() {
             ClearBackground(RAYWHITE);
             BeginMode3D(camera);
                 // On dessine chaque Contenu de la liste.
-                for (auto& contenu : liste_contenus) {
+                for (auto const& contenu : liste_contenus) {
                     contenu.dessine_sur(*this);
                 }
             EndMode3D();

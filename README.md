@@ -999,6 +999,7 @@ void raylibRender::run() {
 
 On peut essayer compiler et voir l'effet de nos modifications :
 
+- ajoutez le nouveau dossier au `CMakeLists.txt` principal : `add_subdirectory(TroisiemeExemple)` ;
 - supprimez la ligne `add_subdirectory(text)` de `TroisiemeExemple/CMakeLists.txt` ;
 - remplacez trois fois `Dessin` par `Dessin3` dans chacune des lignes de `TroisiemeExemple/general/CMakeLists.txt` ;
 - remplacez `DeuxiemeExemple` par `TroisiemeExemple` dans la dernière ligne de `TroisiemeExemple/general/CMakeLists.txt` ;

@@ -51,6 +51,20 @@ Pour commencer, il faut créer un fichier `CMakeLists.txt` à la racine du proje
 cmake_minimum_required(VERSION 3.21)
 project(NOM_DU_PROJET)
 set(CMAKE_CXX_STANDARD 20)
+set(PROJECT_WARNING_FLAGS
+    -pedantic
+    -Wall
+    -Wextra
+    -Wold-style-cast
+    -Woverloaded-virtual
+    -Wfloat-equal
+    -Wshadow
+    -Wwrite-strings
+    -Wpointer-arith
+    -Wcast-qual
+    -Wcast-align
+    -Wconversion
+)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -94,84 +108,11 @@ FetchContent_MakeAvailable(raygui)
 TODO: déplacer plus loin et faire le lien
 
 
-Considérons une structure de projet comme suit :
-
-```
-.
-├── CMakeLists.txt
-├── QuatriemeExemple
-│   ├── CMakeLists.txt
-│   ├── general
-│   │   ├── CMakeLists.txt
-│   │   ├── contenu.h
-│   │   ├── dessinable.h
-│   │   └── support_a_dessin.h
-│   └── raylib
-│       ├── CMakeLists.txt
-│       ├── main_raylib.cpp
-│       ├── raylib_render.cpp
-│       └── raylib_render.h
-└── SixiemeExemple
-    ├── CMakeLists.txt
-    ├── general
-    │   ├── CMakeLists.txt
-    │   ├── contenu.h
-    │   ├── dessinable.h
-    │   └── support_a_dessin.h
-    ├── monkey.glb
-    └── raylib
-        ├── CMakeLists.txt
-        ├── main_raylib.cpp
-        ├── raylib_render.cpp
-        └── raylib_render.h
-```
-
-Le fichier `CMakeLists.txt` traiter jusqu'à présent est celui de la racine du projet, et il faut encore lui ajouter les sous-dossiers où chercher les fichiers sources et les fichiers d'en-tête.
-
-```cmake
-# CMakeLists.txt
-# ...
-add_subdirectory(QuatriemeExemple)
-add_subdirectory(SixiemeExemple)
-```
-
 On présente maintenant la configuration pour le quatrième et le sixième exemple, car ils présentent chacun des particularités utiles à savoir. Le quatrième exemple utilise aussi raygui en plus de raylib ; et le sixième exemple utilise un modèle 3D, ce qui nécessite de copier ce modèle pour le rendre accessible au programme.
 
-Dans tous les cas, on ajoute dans chaque sous-dossier un fichier `CMakeLists.txt` qui va gérer tout ce qu'il y a dans ce sous-dossier. Dans ceux où il n'y a pas de fichiers particuliers, par exemple dans `QuatriemeExemple`, on inclut simplement les sous-dossiers `general` et `raylib`, qui contiennent notre programme :
 
-```cmake
-# QuatriemeExemple/CMakeLists.txt
 
-add_subdirectory(general)
-add_subdirectory(raylib)
-```
 
-Pour le dossier `general`, on va créer une bibliothèque avec les fichiers `contenu.h`, `dessinable.h` et `support_a_dessin.h`, laquelle pourra être utilisée dans le reste du projet.
-
-```cmake
-# QuatriemeExemple/general/CMakeLists.txt
-
-add_library(Ex4Dessin contenu.h dessinable.h support_a_dessin.h)
-set_target_properties(Ex4Dessin PROPERTIES LINKER_LANGUAGE CXX) # Car CMake ne peut pas le deviner (.h est commun à C et C++)
-target_include_directories(Ex4Dessin PUBLIC ${PROJECT_SOURCE_DIR}/QuatriemeExemple/general)
-```
-
-> Quand il n'y a que des fichiers `.h`, il faut spécifier que ce sont des fichiers d'en-tête C++ grace à la propriété `LINKER_LANGUAGE CXX`, sinon on obtient une erreur. De plus, pour que d'autres fichiers puissent utiliser cette bibliothèque, il faut ajouter le dossier contenant les fichiers d'en-tête avec `target_include_directories`.
-
-Dans le dossier `raylib`, on va créer une bibliothèque qui va contenir le fichier `raylib_render.cpp` et son fichier d'en-tête, et un exécutable à partir du fichier `main_raylib.cpp`.
-
-```cmake
-# QuatriemeExemple/raylib/CMakeLists.txt
-
-add_library(Ex4RayRender raylib_render.h raylib_render.cpp)
-target_link_libraries(Ex4RayRender raylib Ex4Dessin)
-target_include_directories(Ex4RayRender PRIVATE ${raygui_SOURCE_DIR}/src)
-
-add_executable(Exemple4 main_raylib.cpp)
-target_link_libraries(Exemple4 Ex4RayRender)
-```
-
-> Comme raygui est un fichier d'en-tête, il faut inclure son dossier (`Ex4RayRender`) dans la cible l'utilisant (on l'ajoute donc à `target_include_directories`).
 
 On procède de façon similaire pour le sixième exemple. On ajoute juste une ligne supplémentaire pour copier le modèle 3D dans le dossier de sortie (`${CMAKE_BINARY_DIR}/bin` configuré au tout début de cette section), afin qu'il soit accessible au programme final.
 
@@ -179,27 +120,15 @@ On procède de façon similaire pour le sixième exemple. On ajoute juste une li
 # SixiemeExemple/raylib/CMakeLists.txt
 
 add_library(Ex6RayRender raylib_render.h raylib_render.cpp)
+target_compile_options(Ex6RayRender PRIVATE ${PROJECT_WARNING_FLAGS})
 target_link_libraries(Ex6RayRender raylib Ex6Dessin)
 file(COPY ${PROJECT_SOURCE_DIR}/SixiemeExemple/monkey.glb DESTINATION ${CMAKE_BINARY_DIR}/bin/ressources)
 
 add_executable(Exemple6 main_raylib.cpp)
+target_compile_options(Exemple6 PRIVATE ${PROJECT_WARNING_FLAGS})
 target_link_libraries(Exemple6 Ex6RayRender)
 ```
 
-Maintenant que le CMake est configuré, on peut l'utiliser pour compiler le projet. Pour cela, il faut se placer dans le dossier `build` et exécuter les commandes suivantes :
-
-```sh
-cmake ..
-cmake --build .
-```
-
-La commande `cmake ..` va générer les fichiers de construction pour le projet, et est à utiliser après chaque modification du `CMakeLists.txt`. La commande `cmake --build .` va compiler le projet et créer les exécutables. On peut compiler un seul exécutable en ajoutant le nom de celui-ci à la fin de la commande, par exemple `cmake --build . --target nom_de_l_executable`. L'intérêt d'être dans un dossier `build` est que cela garde le projet propre, en mettant tous les fichiers de construction dans le dossier `build`.
-
-> Parfois, le compilateur peut réutiliser un fichier d'une compilation précédente s'il ne détecte pas de changement dans le code. Cela peut parfois laisser une erreur pourtant réglée. Dans ce cas, supprimer les fichiers du dossier `build` et relancer la commande `cmake ..`, puis `cmake --build .` peut aider à résoudre le problème.
-
-Pour exécuter un des exécutables, il suffit de se placer dans le dossier `bin` générer dans celui `build` et d'exécuter la commande `./nom_de_l_executable`.
-
-> Note : la plupart des éditeurs de code permettent de définir des configurations permettant de faire ces builds et exécutions dans un dossier autre, sans devoir passer par le terminal.
 
 ---
 
@@ -310,6 +239,7 @@ Ce qui donne :
 # CMakeLists.txt du premier exemple
 
 add_executable(exemple1 main_exemple1.cpp)
+target_compile_options(exemple1 PRIVATE ${PROJECT_WARNING_FLAGS})
 target_link_libraries(exemple1 raylib)
 ```
 
@@ -337,7 +267,19 @@ Cela va :
 - installer raylib si elle n'est pas déjà installée ;
 - compiler votre programme, et créer l'exécutable `bin/exemple1`.
 
-Vous pouvez donc lancer exécutable (`build/bin/exemple1`). Cela devrait ressembler à ceci :
+La commande `cmake ..` va générer les fichiers de construction pour le projet. Elle est à utiliser après chaque modification du `CMakeLists.txt`.  
+La commande `cmake --build .` va compiler le projet et créer les exécutables. On peut compiler un seul exécutable en ajoutant le nom de celui-ci à la fin de la commande ; p.ex. :
+
+    cmake --build . --target nom_de_l_executable
+    
+L'intérêt d'être dans un dossier `build` est que cela garde propres les sources du projet, en mettant tous les fichiers intermédaires (de construction et les exécutables) dans le dossier `build`.
+
+> Note 1 : parfois, le compilateur peut réutiliser un fichier d'une compilation précédente s'il ne détecte pas de changement dans le code. Cela est dû à des dépendances mal écrites dans les `CMakeLists.txt` et peut parfois faire réapparaître une erreur pourtant réglée auparavant. Dans ce cas, le mieux est de bien comprendre la source de l'erreur, puis corriger le(s) `CMakeLists.txt` impliqués  et relancer la commande :
+> 	 cmake .. && cmake --build .
+
+> Note 2 : la plupart des éditeurs de code permettent aussi de définir des configurations pour de faire ces constructions dans un autre dossier, et cela sans devoir passer par le terminal. Référez vous pour cela à la documentation de votre éditeur de code.
+
+Vous pouvez donc maintenant lancer exécutable (`build/bin/exemple1`). Cela devrait ressembler à ceci :
 
 ![ex1_img.png](PremierExemple/ex1_img.png)
 
@@ -679,9 +621,11 @@ target_include_directories(Dessin PUBLIC ${PROJECT_SOURCE_DIR}/DeuxiemeExemple/g
 # text/CMakeLists.txt
 
 add_library(TextViewer text_viewer.h text_viewer.cpp)
+target_compile_options(TextViewer PRIVATE ${PROJECT_WARNING_FLAGS})
 target_link_libraries(TextViewer Dessin)
 
 add_executable(exemple2_text main_text.cpp)
+target_compile_options(exemple2_text PRIVATE ${PROJECT_WARNING_FLAGS})
 target_link_libraries(exemple2_text TextViewer)
 ```
 
@@ -757,7 +701,7 @@ public:
 
     void dessine(Contenu const& a_dessiner) override;
 private:
-    Camera3D camera = { 0 };
+    Camera3D camera;
 
     Contenu c;
 };
@@ -852,9 +796,11 @@ add_subdirectory(text)
 # raylib/CMakeLists.txt
 
 add_library(RayRender raylib_render.h raylib_render.cpp)
+target_compile_options(RayRender PRIVATE ${PROJECT_WARNING_FLAGS})
 target_link_libraries(RayRender raylib Dessin)
 
 add_executable(exemple2_raylib main_raylib.cpp)
+target_compile_options(exemple2_raylib PRIVATE ${PROJECT_WARNING_FLAGS})
 target_link_libraries(exemple2_raylib RayRender)
 ```
 
@@ -1003,16 +949,18 @@ On peut essayer compiler et voir l'effet de nos modifications :
 - supprimez la ligne `add_subdirectory(text)` de `TroisiemeExemple/CMakeLists.txt` ;
 - remplacez trois fois `Dessin` par `Dessin3` dans chacune des lignes de `TroisiemeExemple/general/CMakeLists.txt` ;
 - remplacez `DeuxiemeExemple` par `TroisiemeExemple` dans la dernière ligne de `TroisiemeExemple/general/CMakeLists.txt` ;
-- dans `TroisiemeExemple/raylib/CMakeLists.txt` ;
-  - remplacez trois fois `RayRender` par `RayRender3` ;
+- dans `TroisiemeExemple/raylib/CMakeLists.txt` :
+  - remplacez quatre fois `RayRender` par `RayRender3` ;
   - remplacez une fois `Dessin` par `Dessin3` ;
-  - remplacez deux fois `exemple2_raylib` par `exemple3` :
+  - remplacez trois fois `exemple2_raylib` par `exemple3` :
   
 ```cmake
 add_library(RayRender3 raylib_render.h raylib_render.cpp)
+target_compile_options(RayRender3 PRIVATE ${PROJECT_WARNING_FLAGS})
 target_link_libraries(RayRender3 raylib Dessin3)
 
 add_executable(exemple3 main_raylib.cpp)
+target_compile_options(exemple3 PRIVATE ${PROJECT_WARNING_FLAGS})
 target_link_libraries(exemple3 RayRender3)
 ```
 
@@ -1023,7 +971,7 @@ cmake ..
 cmake --build .
 ```
 
-puis lancer `./bin/exemple3`. Vous devriez y voir trois cube (rouge, vert et blanc) au lieu d'un seul (sans la grille ici) :
+puis lancer `bin/exemple3`. Vous devriez y voir trois cube (rouge, vert et blanc) au lieu d'un seul (illustré ici sans la grille) :
 
 ![ex3_img.png](TroisiemeExemple/ex3_img.png)
 
@@ -1053,33 +1001,44 @@ Dans ce quatrième exemple, nous allons voir trois interactions possibles :
 - la souris : récupérer sa position et l'utiliser pour y dessiner un objet ;
 - raygui : utiliser un bouton pour activer une fonctionalité.
 
-Nous allons faire un pointeur rouge qui suit la souris, activable par un bouton. Pour cela, nous devons ajouter deux attributs à la classe `raylibRender` pour gérer l'état (actif ou non) du mouvement de la caméra et du pointeur :
+> Comme pour le troisième exemple, vous pouvez ici repartir de celui-ci, puis éditer les fichiers modifiés ; p.ex. sous Unix :
+> ```sh
+> mkdir QuatriemeExemple
+> cp -r TroisiemeExemple/CMakeLists.txt TroisiemeExemple/general TroisiemeExemple/raylib QuatriemeExemple
+> ```
+
+Commençons par ajouter deux attributs à la classe `raylibRender` pour gérer l'état (actif ou non) du mouvement de la caméra et du dessin du pointeur de souris :
 
 ```c++
 // ...
-class raylibRender final : public SupportADessin {
+class raylibRender : public SupportADessin {
 // ...
 private:
     // ...
-    bool deplacement = false;
-    bool pointeur = false;
+    bool deplacement;
+    bool pointeur;
 };
 ```
 
-On va commencer par activé le déplacement avec la touche `L`. Pour cela, dans notre boucle principale, on va vérifier si la touche `L` est pressée, et si oui, on va changer l'état du déplacement :
+que l'on initialise par défaut dans `raylib/raylib_render.cpp` :
 
 ```c++
-void raylibRender::run() {
-    while (!WindowShouldClose()) {
-        if (IsKeyPressed(KEY_L)) {
-            deplacement = !deplacement;
-        }
-        // ...
-    }
+// ... (en-têtes)
+
+raylibRender::raylibRender()
+: liste_contenus({
+      Contenu(),
+      Contenu({-1,1,1}, VERT),
+      Contenu({-1,0,1}, ROUGE)
+  })
+  , deplacement(false)
+  , pointeur(false)
+{
+    // ... (comme avant)
 }
 ```
 
-Ensuite, on va mettre à jour la caméra seulement si le déplacement est activé :
+Décidons d'activer le déplacement avec la touche `L`. Pour cela, on vérifie dans la boucle principale si la touche `L` est pressée, et si oui, on change l'état du déplacement. Puis on met à jour la caméra seulement si le déplacement est activé :
 
 ```c++
 void raylibRender::run() {
@@ -1095,23 +1054,16 @@ void raylibRender::run() {
 }
 ```
 
-Et on peut ajouter un message à l'écran pour indiquer si le déplacement est activé ou non :
+Ajoutons également un message à l'écran pour indiquer si le déplacement est activé ou non.  
+Pour que le texte soit correctement visible, on ne le dessine pas dans le mode 3D, mais _après_ avoir quitté ce mode 3D.  
+Pour le [paramétrage du texte](https://www.raylib.com/examples/text/loader.html?name=text_format_text), on donne la chaîne de caractères à afficher, la position du texte (les deux premiers arguments numériques), la taille de la police et la couleur du texte.   
+En cas d'utilisation d'une `string` C++, il faut la convertir en « chaîne à la C » via la méthode `c_str()`.
+
+Cela donne le code suivant :
 
 ```c++
 void raylibRender::run() {
-    while (!WindowShouldClose()) {
-        if (IsKeyPressed(KEY_L))
-            deplacement = !deplacement;
-
-        if (deplacement)
-            UpdateCamera(&camera, CAMERA_FREE);
-
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
-            BeginMode3D(camera);
-                for (auto const& contenu : liste_contenus) {
-                    contenu.dessine_sur(*this);
-                }
+            // ...
             EndMode3D();
 
             DrawText("Appuyez sur 'L' pour activer/désactiver le mouvement de la caméra", 10, 10, 20, DARKGRAY);
@@ -1121,24 +1073,48 @@ void raylibRender::run() {
 }
 ```
 
-Pour que le texte soit correctement visible, on ne le dessine pas dans le mode 3D, mais après l'avoir quitté. Pour le [paramétrage du texte](https://www.raylib.com/examples/text/loader.html?name=text_format_text), on donne la chaîne de caractères à afficher, la position du texte (les deux premiers arguments numériques), la taille de la police et la couleur du texte. En cas d'utilisation d'une `string` C++, il faut la convertir en chaîne à la C via la méthode `c_str()`.
+Et il ne faut pas oublier d'ajouter `#include <string>` dans l'entête.
+
+> Le code ci-dessus utilise l'opérateur ternaire `?:` que vous ne connaissez peut être pas encore. Cet opérateur utilise trois argument (`A`, `B` et `C`) : `A ? B : C` et il :
+> 1. évalue `A` ;
+> 2. évalue `B` si `A` est vrai, et sinon évalue `C` ;
+> 3. vaut le résultat de la dernière évaluation (`B` ou `C`).
+> Dans le cas ci-dessus, `(deplacement ? "libre" : "fixe")` vaut donc `"libre"` si `deplacement` est vrai et `"fixe"` sinon.
+
+On peut essayer compiler et voir l'effet de nos modifications :
+
+- ajoutez le nouveau dossier au `CMakeLists.txt` principal : `add_subdirectory(QuatriemeExemple)` ;
+- remplacez trois fois `Dessin3` par `Dessin4` dans chacune des lignes de `QuatriemeExemple/general/CMakeLists.txt` ;
+- remplacez `TroisiemeExemple` par `QuatriemeExemple` dans la dernière ligne de `QuatriemeExemple/general/CMakeLists.txt` ;
+- dans `QuatriemeExemple/raylib/CMakeLists.txt` : remplacez simplement `3` par `4` ; cela :
+  - remplace trois fois `RayRender3` par `RayRender4` ;
+  - remplace une fois `Dessin3` par `Dessin4` ;
+  - remplace deux fois `exemple3` par `exemple4`.
+
+
+En lançant `bin/exemple4`, vous devriez alors obtenir :
 
 | Mouvement OFF                                      | Mouvement ON                                           |
 |----------------------------------------------------|--------------------------------------------------------|
 | ![ex4_camfix.png](QuatriemeExemple/ex4_camfix.png) | ![ex4_camlibre.png](QuatriemeExemple/ex4_camlibre.png) |
 
-Nous allons maintenant voir comment ajouter un bouton. Pour cela, nous allons utiliser la bibliothèque raygui, que l'on importe comme suit :
+
+Voyons maintenant comment ajouter un bouton. Pour cela, nous allons utiliser la bibliothèque raygui, que l'on importe comme suit :
 
 ```c++
 // raylib_render.cpp
-// ...
+
+#include "raylib_render.h"
+#include <string>
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
 #undef RAYGUI_IMPLEMENTATION
+
+raylibRender::raylibRender()
 // ...
 ```
 
-> Dû à sa conception, mettre `#define RAYGUI_IMPLEMENTATION` avant d'inclure le fichier d'en-tête est nécessaire pour que raygui fonctionne.
+> Dû à sa conception, il est nécessaire de mettre `#define RAYGUI_IMPLEMENTATION` avant d'inclure le fichier d'en-tête.
 
 Sur le GitHub de [raygui](https://github.com/raysan5/raygui), nous pouvons trouver [les différents composants disponibles](https://github.com/raysan5/raygui?tab=readme-ov-file#basic-controls), ainsi que divers programmes pouvant être utile pour réfléchir à l'interface graphique, comme un [éditeur de layout](https://raylibtech.itch.io/rguilayout) ou [d'icones](https://raylibtech.itch.io/rguiicons), et des exemples d'utilisation.
 
@@ -1156,7 +1132,7 @@ void raylibRender::run() {
 }
 ```
 
-Le toggle prend en argument un rectangle (la position et la taille du bouton), le texte à afficher et un pointeur vers une variable booléenne qui va changer d'état lorsque l'on clique sur le bouton.
+Ce bouton prend en argument un rectangle (la position et la taille du bouton), le texte à afficher et un pointeur vers une variable booléenne qui va changer d'état lorsque l'on clique sur le bouton.
 
 > Pour un bouton classique, l'utilisation est un peu différente :
 > ```c++
@@ -1172,7 +1148,7 @@ Le toggle prend en argument un rectangle (la position et la taille du bouton), l
 > ```
 > Donc il ne faut pas hésiter à chercher comment s'utilise un composant avant de l'utiliser.
 
-Pour récupérer la position de la souris, on peut utiliser la fonction `GetMousePosition()`, qui renvoie un `Vector2` avec les coordonnées de la souris. On peut alors dessiner un cercle à cette position :
+Pour récupérer la position de la souris, on peut utiliser la fonction `GetMousePosition()`, qui renvoie un `Vector2` avec les coordonnées de la souris. On peut alors dessiner p.ex. un cercle à cette position :
 
 ```c++
 void raylibRender::run() {
@@ -1190,7 +1166,30 @@ void raylibRender::run() {
 }
 ```
 
-Ce qui nous donne un affichage comme suit :
+
+Pour compiler, comme raygui est un fichier d'en-tête, il faut inclure son dossier dans les endroits où chercher. On utilise pour cela la commande `target_include_directories`. Il **ne** faut par ailleurs **pas** utiliser ici les options de compilation `${PROJECT_WARNING_FLAGS}` qui génèreront bien trop de warnings en raison du C de raygui :
+
+```cmake
+# QuatriemeExemple/raylib/CMakeLists.txt
+
+add_library(RayRender4 raylib_render.h raylib_render.cpp)
+target_include_directories(RayRender4 PRIVATE ${raygui_SOURCE_DIR}/src)
+target_link_libraries(RayRender4 raylib Dessin4)
+
+add_executable(exemple4 main_raylib.cpp)
+target_compile_options(exemple4 PRIVATE ${PROJECT_WARNING_FLAGS})
+target_link_libraries(exemple4 RayRender4)
+```
+
+Compilez, en ignorant les « _warnings_ » propres à `raygui.h` (petite différence de norme entre C et C++).
+
+> Vous pouvez aussi supprimer ces warnings en demandant au compilateur de les ignorer en ajoutant l'option `-Wno-enum-compare` :
+> ```cmake 
+> target_compile_options(RayRender4 PRIVATE ${PROJECT_WARNING_FLAGS} -Wno-enum-compare)
+> ``` 
+
+
+L'exécutable devrait alors donner un affichage comme suit :
 
 | Pointeur OFF                                     | Pointeur ON                                       |
 |--------------------------------------------------|---------------------------------------------------|
@@ -1233,7 +1232,7 @@ Enfin, lorsqu'une certaine condition d'arrêt est atteinte (p.ex. un certain dé
 Pour cet exemple, nous repartons des fichiers de [l'exemple 2](#deuxième-exemple--modularisation-et-dessin-3d), et nous modifions le Contenu afin qu'il ait un angle de rotation, un getter, ainsi qu'une méthode faisant évoluer cet angle pendant `dt` :
 
 ```c++
-class Contenu final : public Dessinable {
+class Contenu : public Dessinable {
 public:
     // ...
     double get_angle() const { return angle; }
@@ -1305,7 +1304,7 @@ Pour commencer, nous allons ajouter à notre classe `raylibRender` un attribut p
 
 ```c++
 // ...
-class raylibRender final : public SupportADessin {
+class raylibRender : public SupportADessin {
     // ...
 private:
     // ...

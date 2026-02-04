@@ -1022,7 +1022,9 @@ cmake ..
 cmake --build .
 ```
 
-puis lancer `./bin/exemple3`. Vous devriez y voir trois cube (rouge, vert et blanc) au lieu d'un seul.
+puis lancer `./bin/exemple3`. Vous devriez y voir trois cube (rouge, vert et blanc) au lieu d'un seul (sans la grille ici) :
+
+![ex3_img.png](TroisiemeExemple/ex3_img.png)
 
 ### Mouvements de caméra
 
@@ -1032,23 +1034,13 @@ Si l'on veut permettre le movement de la caméra, il suffit d'ajouter la fonctio
 void raylibRender::run() {
     while (!WindowShouldClose()) {
         UpdateCamera(&camera, CAMERA_FREE);
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
-            BeginMode3D(camera);
-                for (auto const& contenu : liste_contenus) {
-                    contenu.dessine_sur(*this);
-                }
-            EndMode3D();
-        EndDrawing();
-    }
+        // ... (suite comme avant)
 }
 ```
 
-`UpdateCamera` prend en paramètre la caméra à mettre à jour et le type de mouvement, ici [`CAMERA_FREE`](https://www.raylib.com/examples/core/loader.html?name=core_3d_camera_free), qui gére le mouvement via la souris et les touches `W`, `A`, `S` et `D` (d'autres modes de mouvement sont présentés [ici](https://www.raylib.com/examples/core/loader.html?name=core_3d_camera_first_person)).
+`UpdateCamera()` prend en paramètre la caméra à mettre à jour et le type de mouvement, ici [`CAMERA_FREE`](https://www.raylib.com/examples/core/loader.html?name=core_3d_camera_free), qui gére le mouvement via la souris et les touches `W`, `A`, `S` et `D` (d'autres modes de mouvement sont présentés [ici](https://www.raylib.com/examples/core/loader.html?name=core_3d_camera_first_person)).
 
-L'affichage final ressemble donc à ceci :
-
-![ex3_img.png](TroisiemeExemple/ex3_img.png)
+Recompilez et essayez les déplacements. Attention la caméra est sensible à la souris et il se peut donc qu'en ayant amené la souris sur la fenêtre vous ayez déplacé le point de vue ; bougez alors la souris pour voir les cubes.
 
 ---
 

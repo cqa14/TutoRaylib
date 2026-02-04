@@ -1,4 +1,4 @@
-(c) 2025 by Romain Blondel; licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+(c) 2025 by Romain Blondel; licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). Version 1.0 26.04.02
 
 # Tuto raylib
 
@@ -221,7 +221,8 @@ Il faut tout d'abord inclure les fichiers d'en-tête de raylib, puis écrire la 
 ```c++
 #include <raylib.h>
 
-int main() {
+int main()
+{
     // À compléter
     return 0;
 }
@@ -233,7 +234,8 @@ Et comme toujours en programmation, il faut libérer toute ressource que l'on a 
 ```c++
 #include <raylib.h>
 
-int main() {
+int main()
+{
     InitWindow(800, 450, "Premier exemple");
 
     CloseWindow();
@@ -246,7 +248,8 @@ Il faut ensuite lancer la boucle principale d'attente d'évènements, qui se ter
 ```c++
 #include <raylib.h>
 
-int main() {
+int main()
+{
     InitWindow(800, 450, "Premier exemple");
 
     while (!WindowShouldClose()) {
@@ -271,7 +274,8 @@ Il est important en règle générale de remettre la couleur de fond de la fenê
 ```c++
 #include <raylib.h>
 
-int main() {
+int main()
+{
     InitWindow(800, 450, "Premier exemple");
 
     while (!WindowShouldClose()) {
@@ -465,7 +469,7 @@ class Dessinable {
 public:
 
     // la raison d'être des Dessinable
-    virtual void dessine_sur(SupportADessin&) = 0;
+    virtual void dessine_sur(SupportADessin&) const = 0;
 
     // mise en virtuel du destructeur (puisque classe abstraite)
     virtual ~Dessinable()                    = default;
@@ -543,7 +547,7 @@ public:
      * Ceci est la méthode devant être ajoutée à toute classe
      * étendant Dessinable, afin de pouvoir être dessinée correctement.
      */
-    void dessine_sur(SupportADessin& support) override
+    void dessine_sur(SupportADessin& support) const override
     { support.dessine(*this); }
 
     /*
@@ -820,9 +824,9 @@ Comme dans le premier exemple, on a notre boucle d'exécution où l'on remet un 
 ```c++
 void raylibRender::dessine(Contenu const& a_dessiner)
 {
-    Vector3 cubePosition = { 0.0f, 1.0f, 0.0f };
-    DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, LIME);
-    DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, DARKGREEN);
+    Vector3 position = { 0.0f, 1.0f, 0.0f };
+    DrawCube(position, 2.0f, 2.0f, 2.0f, LIME);
+    DrawCubeWires(position, 2.0f, 2.0f, 2.0f, DARKGREEN);
 }
 ```
 
@@ -858,27 +862,38 @@ Après compilation, on devrait obtenir un affichage 3D qui ressemble à ceci :
 
 ![ex2_img.png](DeuxiemeExemple/ex2_img.png)
 
-Dans les codes ci-dessus, nous utilisons également les fonctions `DrawCubeWires()` et `DrawGrid()`, qui permettent respectivement de dessiner les contours du cube et une grille au sol afin de mettre en évidence les objets, mais ceci est superflus en soi.
+Dans les codes ci-dessus, nous utilisons également les fonctions `DrawCubeWires()` et `DrawGrid()`, qui permettent respectivement de dessiner les contours du cube et une grille au sol afin de mettre en évidence les objets, mais ceci est superflus en soi :
+
+![ex2_img2.png](DeuxiemeExemple/ex2_img2.png)
 
 > Les objets peuvent paraitre très plat, car il n'y a pas de système de lumière par défaut, ni de méthode suffisamment simple pour le présenter ici, ce qui fait qu'il n'y a pas d'ombres par exemple (l'[exemple le plus simple](https://www.raylib.com/examples/shaders/loader.html?name=shaders_basic_lighting) gère l'ombre pour chaque objet, et sinon il faudrait faire un système de « [_shadow mapping_](https://en.wikipedia.org/wiki/Shadow_mapping) »).
 
-![ex2_img2.png](DeuxiemeExemple/ex2_img2.png)
 
 ---
 
 ## Troisième exemple : dessin de plusieurs objets et mouvements de caméra
 
-> Pour les exemples qui suivent, nous nous concentrerons que sur la partie raylib, et nous ne modifierons pas les fichiers `main_raylib.cpp`, `dessinable.h` et `support_a_dessin.h`.
+> Pour les exemples qui suivent, nous nous concentrerons que sur la partie raylib, et nous ne modifierons pas les fichiers `main_raylib.cpp`, `dessinable.h` et `support_a_dessin.h`. Vous pouvez donc simplement copier ces fichiers dans le nouveau sous-répertoire pour votre troisième exemple ; voire même copier toute la structure, p.ex. sous Unix :
+> ```sh
+> mkdir TroisiemeExemple
+> cp -r DeuxiemeExemple/CMakeLists.txt DeuxiemeExemple/general DeuxiemeExemple/raylib TroisiemeExemple
+> ```
+> Il suffira alors simplement d'éditer les fichiers à modifier.
+>
+> Par ailleurs, on pourrait aussi, bien sûr, adapter la partie « texte » de façon similaire aux adaptations que nous allons ici apporter à la partie raylib. Mais ce n'est pas l'objet du présent tutoriel.
 
-Afin d'avoir un peu d'intérêt à l'exemple, nous modifions les Contenu comme suit :
+### Plusieurs vrais objets
+
+Afin d'avoir un peu d'intérêt à l'exemple, nous allons créer des contenus un peu plus pertients. Modifions `general/contenu.h` comme suit :
 
 ```c++
-// ...
-enum COULEUR {
+// ... (en-têtes)
+
+enum Couleur {
     NONE,
     ROUGE,
     VERT,
-    BLEU,
+    BLEU
 };
 
 struct Position {
@@ -887,43 +902,66 @@ struct Position {
     double z;
 };
 
-class Contenu final : public Dessinable {
+class Contenu : public Dessinable {
 public:
-    // ...
-    Contenu(const Position &p = {0, 0, 0}, const COULEUR c = NONE) : position(p), color(c) {};
+    // ... (comme avant)
+    // mais SUPPRIMER le cteur par défaut:   Contenu() = default;
+    // Le remplacer par :
 
-    void dessine_sur(SupportADessin &support) override { support.dessine(*this); }
+    Contenu(const Position &p = {0, 0, 0}, const Couleur c = NONE)
+    : position(p), color(c) {}
+
+    // ... (comme avant)
 
     Position get_position() const { return position; }
-    COULEUR get_color() const { return color; }
+    Couleur get_color() const { return color; }
+
 private:
     Position position;
-    COULEUR color;
+    Couleur  color;
 };
 ```
 
-Ceci lui ajoute donc une propriété `position` et une couleur, qui sont toutes deux des attributs de la classe, ainsi qu'un getter et un constructeur. Nous pouvons aussi modifier la déclaration de `raylibRender` afin d'avoir plusieurs contenus à afficher :
+Ceci ajoute donc une `position` et une couleur aux contenus. Nous pouvons aussi modifier la déclaration de `raylibRender` (dans `raylib/raylib_render.h`) afin d'avoir plusieurs contenus à afficher :
 
 ```c++
-// ...
-class raylibRender final : public SupportADessin {
-// ...
+// ... (en-têtes)
+#include <vector>
+
+class raylibRender : public SupportADessin {
+    // ... (comme avant)
+
 private:
-    // ...
-    std::vector<Contenu> liste_contenus = {
-        Contenu(),
-        Contenu({-1,1,1}, VERT),
-        Contenu({-1,0,1}, ROUGE),
-    };
+    // ... (Camera3D comme avant)
+    // Remplacer : Contenu c;
+    // Par :
+    std::vector<Contenu> liste_contenus;
 };
 ```
 
-La méthode `dessine()` a été modifiée pour utiliser les propriétés de `Contenu` :
+et son initialisation par défaut dans `raylib/raylib_render.cpp` :
 
 ```c++
-void raylibRender::dessine(Contenu const& a_dessiner) {
+// ... (en-têtes)
+
+raylibRender::raylibRender()
+: liste_contenus({
+      Contenu(),
+      Contenu({-1,1,1}, VERT),
+      Contenu({-1,0,1}, ROUGE)
+  })
+{
+    // ... (comme avant)
+}
+```
+
+Bien sûr, il faut modifier La méthode `dessine()` pour utiliser les propriétés de `Contenu` :
+
+```c++
+void raylibRender::dessine(Contenu const& a_dessiner)
+{
     const auto [x, y, z] = a_dessiner.get_position();
-    const Vector3 cubePosition = { static_cast<float>(x), static_cast<float>(y), static_cast<float>(z) };
+    const Vector3 position = { static_cast<float>(x), static_cast<float>(y), static_cast<float>(z) };
     auto color = WHITE;
     switch (a_dessiner.get_color()) {
         case ROUGE:
@@ -936,31 +974,57 @@ void raylibRender::dessine(Contenu const& a_dessiner) {
             color = BLUE;
             break;
         default:
+            color = WHITE;
             break;
     }
-    DrawCube(cubePosition, 1.0f, 1.0f, 1.0f, color);
-    DrawCubeWires(cubePosition, 1.0f, 1.0f, 1.0f, BLACK);
+    DrawCube(position, 1.0f, 1.0f, 1.0f, color);
+    DrawCubeWires(position, 1.0f, 1.0f, 1.0f, BLACK);
 }
 ```
 
-La formulation `const auto [x, y, z] = a_dessiner.get_position();` permet de décomposer le `Position` en trois variables `x`, `y` et `z` automatiquement. De plus, pour la position, on doit forcer la conversion en `float` pour éviter des erreurs de compilation, ceci via le `static_cast<float>(...)`.
+Note : les `Contenu::position` étant en `double`, mais les posistions dans la raylib en `float`, on doit forcer la conversion via les `static_cast<float>(...)`. (On aurait évidemment pu mettre des `float` dès le départ, mais, restant fidèle à l'indépendance entre coeur de la simulation (`Contenu`) et représentation (raylib), un choix local de la bibliothèque de visualisation **ne** doit **pas** affecter la conception générale du coeur du modèle !)
 
-Finalement, on veut afficher chaque cube dans la méthode `run()`, et pour cela, on peut faire une boucle sur la liste des contenus :
+Finalement, on doit aussi adapter la méthode `run()` pour faire une boucle sur la liste des contenus :
 
 ```c++
 void raylibRender::run() {
-    while (!WindowShouldClose()) {
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
-            BeginMode3D(camera);
-                for (auto& contenu : liste_contenus) {
-                    contenu.dessine_sur(*this);
-                }
-            EndMode3D();
-        EndDrawing();
-    }
+   // ...
+   // Remplacer :   c.dessine_sur(*this);
+   // par :
+   for (auto const& contenu : liste_contenus) {
+       contenu.dessine_sur(*this);
+   }
 }
 ```
+
+On peut essayer compiler et voir l'effet de nos modifications :
+
+- supprimez la ligne `add_subdirectory(text)` de `TroisiemeExemple/CMakeLists.txt` ;
+- remplacez trois fois `Dessin` par `Dessin3` dans chacune des lignes de `TroisiemeExemple/general/CMakeLists.txt` ;
+- remplacez `DeuxiemeExemple` par `TroisiemeExemple` dans la dernière ligne de `TroisiemeExemple/general/CMakeLists.txt` ;
+- dans `TroisiemeExemple/raylib/CMakeLists.txt` ;
+  - remplacez trois fois `RayRender` par `RayRender3` ;
+  - remplacez une fois `Dessin` par `Dessin3` ;
+  - remplacez deux fois `exemple2_raylib` par `exemple3` :
+  
+```cmake
+add_library(RayRender3 raylib_render.h raylib_render.cpp)
+target_link_libraries(RayRender3 raylib Dessin3)
+
+add_executable(exemple3 main_raylib.cpp)
+target_link_libraries(exemple3 RayRender3)
+```
+
+Vous pouvez ensuite aller dans `build` et faire
+
+```sh
+cmake ..
+cmake --build .
+```
+
+puis lancer `./bin/exemple3`. Vous devriez y voir trois cube (rouge, vert et blanc) au lieu d'un seul.
+
+### Mouvements de caméra
 
 Si l'on veut permettre le movement de la caméra, il suffit d'ajouter la fonction `UpdateCamera()` de raylib :
 
@@ -971,7 +1035,7 @@ void raylibRender::run() {
         BeginDrawing();
             ClearBackground(RAYWHITE);
             BeginMode3D(camera);
-                for (auto& contenu : liste_contenus) {
+                for (auto const& contenu : liste_contenus) {
                     contenu.dessine_sur(*this);
                 }
             EndMode3D();
@@ -1052,7 +1116,7 @@ void raylibRender::run() {
         BeginDrawing();
             ClearBackground(RAYWHITE);
             BeginMode3D(camera);
-                for (auto& contenu : liste_contenus) {
+                for (auto const& contenu : liste_contenus) {
                     contenu.dessine_sur(*this);
                 }
             EndMode3D();
@@ -1209,7 +1273,7 @@ void raylibRender::run() {
 }
 ```
 
-On remarque que le dessin est identique au second exemple, le seul changement est que l'on récupère le temps écoulé depuis la dernière image avec `GetFrameTime`, et que l'on fait évoluer le contenu en appelant la méthode `evolue()` avec ce temps.
+On remarque que le dessin est identique au deuxième exemple, le seul changement est que l'on récupère le temps écoulé depuis la dernière image avec `GetFrameTime`, et que l'on fait évoluer le contenu en appelant la méthode `evolue()` avec ce temps.
 
 Maintenant, il faut modifier la méthode `dessine()` pour prendre en compte l'angle de rotation. On va pour cela utiliser la bibliothèque `rlgl` de raylib, qui permet de faire des transformations sur les objets 3D par des matrices ([ci-joint](https://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/) un document lié à OpenGl sur le sujet, qui est la bibliothèque sur laquelle est construite raylib).
 

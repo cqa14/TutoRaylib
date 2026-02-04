@@ -535,7 +535,7 @@ Le `TextViewer` est un support à dessin qui va afficher le contenu sur un `ostr
 
 class TextViewer : public SupportADessin {
 public:
-    explicit TextViewer(std::ostream& flot) : flot(flot) {}
+    explicit TextViewer(std::ostream& flot_) : flot(flot_) {}
 
     ~TextViewer() override                   = default;
     TextViewer(TextViewer const&)            = delete;

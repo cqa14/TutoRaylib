@@ -20,7 +20,7 @@ private:
     /*
      * Afin de faire un dessin 3D, il faut une caméra.
      */
-    Camera3D camera = { 0 };
+    Camera3D camera;
 
     /*
      * On enregistrera dans cette architecture le contenu à dessiner

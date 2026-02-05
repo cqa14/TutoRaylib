@@ -4,11 +4,11 @@
 
 ## Introduction
 
-Dans la vie courante, il est rare d'intéragir avec un programme directement par le terminal. Les interfaces graphiques offrent de nouvelles possibilités d'affichage ainsi qu'une expérience utilisateur plus agréable. Ce document vise à donner un aperçu de [raylib](https://www.raylib.com), une bibliothèque permettant de créer des interfaces graphiques en C++.
+Dans la vie courante, il est rare d'interagir avec un programme directement par le terminal. Les interfaces graphiques offrent de nouvelles possibilités d'affichage ainsi qu'une expérience utilisateur plus agréable. Ce document vise à donner un aperçu de [raylib](https://www.raylib.com), une bibliothèque permettant de créer des interfaces graphiques en C++.
 
 > raylib est à l'origine une bibliothèque C, pensée pour programmer des jeux vidéo. Elle a l'avantage d'être relativement simple à utiliser, et d'avoir été portée dans de nombreux langages et sur toutes les plateformes. Son origine en C fait que certains exemples de la documentation doivent être quelque peu adaptés pour être dans un style plus proche du C++.
 
-> Il existe de nombreuses autres bibliothèques permettant de créer des interfaces graphiques, comme [Qt](https://qt.io/), [GLFW](https://www.glfw.org/), [OGRE](https://www.ogre3d.org/), [wxWidgets](https://www.wxwidgets.org/), ou encore [SDL](https://www.libsdl.org/), qui ont chacunes leurs avantages et inconvénients, donc il ne faut surtout pas hésiter à regarder s'il y en a une semblant plus adaptée à un projet particulier.
+> Il existe de nombreuses autres bibliothèques permettant de créer des interfaces graphiques, comme [Qt](https://qt.io/), [GLFW](https://www.glfw.org/), [OGRE](https://www.ogre3d.org/), [wxWidgets](https://www.wxwidgets.org/), ou encore [SDL](https://www.libsdl.org/), qui ont chacune leurs avantages et inconvénients, donc il ne faut surtout pas hésiter à regarder s'il y en a une semblant plus adaptée à un projet particulier.
 
 Le document structuré comme suit :
 
@@ -24,7 +24,7 @@ Le document structuré comme suit :
 Quand on utilise une bibliothèque graphique, il faut bien comprendre son comportement :
 
 - il y a celles qui utilisent une approche de dessin séquentielle : on dessine un objet, puis un autre, et ainsi de suite ;
-- et il y a celles évènementielles, dont raylib : l'idée est d'avoir une boucle infinie qui va attendre des évènements ; cela peut être un clic de souris, une touche de clavier ou même un simple délais d'attente ; lorsque qu'un évènement se produit, on le traite, puis on retourne à la boucle infinie d'attente.
+- et il y a celles événementielles, dont raylib : l'idée est d'avoir une boucle infinie qui va attendre des évènements ; cela peut être un clic de souris, une touche de clavier ou même un simple délais d'attente ; lorsque qu'un évènement se produit, on le traite, puis on retourne à la boucle infinie d'attente.
 
 Il faut donc programmer _avant_ cette boucle toutes les fonctions qui vont être associées à des évènements, puis initialiser tout ce qu'il faut (fenêtres de dessin, boutons, variables, ...) avant de lancer la boucle principale.
 
@@ -40,7 +40,7 @@ Ce sont ces étapes qui seront détaillées dans la suite de ce document.
 
 ## Installation et compilation
 
-Afin de faciliter l'usage de raylib, nous allons utiliser [CMake](https://cmake.org/) comme outil d'aide à la compilation ; mais l'usage d'un `Makefile` est également possible si raylib est déjà disponible sur le système en ajoutant le flag `-lraylib`. Nous laisserons le soin au lecteur de regarder comment faire l'installation dans ce cas là, si cela l'intéresse ([référence d'installation sur le GitHub de raylib](https://github.com/raysan5/raylib?tab=readme-ov-file#build-and-installation)).
+Afin de faciliter l'usage de raylib, nous allons utiliser [CMake](https://cmake.org/) comme outil d'aide à la compilation ; mais l'usage d'un `Makefile` est également possible si raylib est déjà disponible sur le système en ajoutant l'option `-lraylib`. Nous laisserons le soin au lecteur de regarder comment faire l'installation dans ce cas là, si cela l'intéresse ([référence d'installation sur le GitHub de raylib](https://github.com/raysan5/raylib?tab=readme-ov-file#build-and-installation)).
 
 Avec CMake, on pourra directement installer raylib depuis CMake lui-même, ce qui permet de ne pas avoir à s'en soucier sur chaque appareil sur lequel on sera amené à travailler.
 
@@ -1376,13 +1376,13 @@ Et on obtient directement (notons qu'il y a le même problème d'éclairage qu'a
 
 ## Conclusion
 
-Ce tutoriel ne vise qu'à offrir un aperçu de ce que l'on peut faire avec raylib, et en général avec des bibliothèques graphiques. Néanmoins, il n'est pas exhaustif et quand on ne sait pas comment faire quelque chose, il ne faut pas hésiter à chercher dans la documentation ou alors parmi les exemples. Il ne faut ainsi surtout pas hésiter à regarder les divers liens proposés au fur et à mesure de ce tutoriel, et toute autre ressource à ce sujet paraissant pertinente.
+Ce tutoriel ne vise qu'à offrir un aperçu de ce que l'on peut faire avec raylib, et en général avec des bibliothèques graphiques. Il n'est donc, de loin, pas exhaustif. Quand on ne sait pas comment faire quelque chose, il ne faut pas hésiter à chercher dans la documentation ou parmi les exemples. Il ne faut ainsi pas hésiter à regarder les divers liens proposés au fur et à mesure de ce tutoriel.
 
 ---
 
 ## Annexe : Pourquoi apprendre à utiliser une bibliothèque graphique ?
 
-Dans le cadre des études de mathématiques ou de physique, il peut paraitre superflu d'apprendre à utiliser une bibliothèque graphique, car on ne vise pas à développer des applications ou des jeux vidéos. Néanmoins, les compétences acquises dans ce domaine peuvent facilement être transposées pour d'autres cas d'usages. Par exemple, pour visualiser des données, on retrouvera des patterns assez similaires à ceux présentés :
+Dans le cadre des études de mathématiques ou de physique, il peut paraitre superflu d'apprendre à utiliser une bibliothèque graphique, car on ne vise pas à développer des applications ni des jeux vidéos. Néanmoins, les compétences acquises dans ce domaine peuvent facilement être transposées pour d'autres cas d'usages. Par exemple, pour visualiser des données, on retrouvera des patterns assez similaires à ceux présentés :
 
 ```python
 import matplotlib.pyplot as plt
@@ -1444,7 +1444,7 @@ produisant une animation comme suit :
 
 On trouve des similarités entre chacun de ces outils, avec par exemple quels concepts permettent quelles configurations, comment structurer un code quand on a une idée graphique en tête, etc.
 
-Le choix de raylib est aussi en quelque sorte dans cette suite d'idée, car elle fournit déjà un bon nombre de fonctionnalités et permet d'arriver assez vite à des résultats satisfaisants. De plus, si dans des cours passés certains ont pu se familiariser avec d'autres bibliothèques graphiques tel que [`pygame`](https://www.pygame.org), des similarités seront évidentes, en comparant ce code issu de la documentation de `pygame` avec ceux que l'on a fait avec raylib :
+Nous avons choisi raylib car elle fournit déjà un bon nombre de fonctionnalités et permet d'arriver assez vite/simplement à des résultats satisfaisants. De plus, si dans des cours passés certain(e)s ont pu se familiariser avec d'autres bibliothèques graphiques (p.ex. [`pygame`](https://www.pygame.org)) des similarités seront évidentes, p.ex. en comparant ce code issu de la documentation de `pygame` avec ceux que l'on a fait ic avec raylib :
 
 ```python
 # Example file showing a circle moving on screen

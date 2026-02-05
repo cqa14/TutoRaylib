@@ -4,7 +4,7 @@ class SupportADessin;
 
 class Dessinable {
 public:
-    virtual void dessine_sur(SupportADessin&) = 0;
+    virtual void dessine_sur(SupportADessin&) const = 0;
 
     virtual ~Dessinable() = default;
     Dessinable(Dessinable const&) = default;

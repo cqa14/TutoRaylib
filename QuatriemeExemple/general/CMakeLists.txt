@@ -1,3 +1,4 @@
 add_library(Ex4Dessin contenu.h dessinable.h support_a_dessin.h)
 set_target_properties(Ex4Dessin PROPERTIES LINKER_LANGUAGE CXX) # Car CMake ne peut pas le deviner (.h est commun à C et C++)
+target_compile_options(Ex4Dessin PRIVATE ${PROJECT_WARNING_FLAGS})
 target_include_directories(Ex4Dessin PUBLIC ${PROJECT_SOURCE_DIR}/QuatriemeExemple/general)

@@ -14,7 +14,7 @@ public:
 
     void dessine(Contenu const& a_dessiner) override;
 private:
-    Camera3D camera = { 0 };
+    Camera3D camera;
 
     // Ces variables sont utilisées pour les états des événements que l'on va implémenter.
     bool deplacement = false;

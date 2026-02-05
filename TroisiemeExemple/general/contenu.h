@@ -30,7 +30,7 @@ public:
     Contenu &operator=(Contenu &&) = default;
     explicit Contenu(const Position &p = {0, 0, 0}, const COULEUR c = NONE) : position(p), color(c) {};
 
-    void dessine_sur(SupportADessin &support) override { support.dessine(*this); }
+    void dessine_sur(SupportADessin &support) const override { support.dessine(*this); }
 
     [[nodiscard]] Position get_position() const { return position; }
     [[nodiscard]] COULEUR get_color() const { return color; }

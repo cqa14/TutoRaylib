@@ -26,5 +26,5 @@ public:
      * Ceci est la méthode devant être ajoutée à toute classe
      * étendant Dessinable, afin de pouvoir être dessinée.
      */
-    void dessine_sur(SupportADessin &support) override { support.dessine(*this); }
+    void dessine_sur(SupportADessin &support) const override { support.dessine(*this); }
 };

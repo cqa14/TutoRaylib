@@ -70,4 +70,5 @@ int main()
 
     // Fermeture de la fenêtre
     CloseWindow();
+    return 0;
 }

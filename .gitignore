@@ -3,6 +3,7 @@
 
 CMakeFiles/
 _deps/
+build/
 
 CMakeCache.txt
 CPackConfig.cmake

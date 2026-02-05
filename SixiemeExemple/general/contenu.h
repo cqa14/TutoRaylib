@@ -12,5 +12,5 @@ public:
     Contenu &operator=(Contenu &&) = default;
     Contenu() = default;
 
-    void dessine_sur(SupportADessin &support) override { support.dessine(*this); }
+    void dessine_sur(SupportADessin &support) const override { support.dessine(*this); }
 };

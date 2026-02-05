@@ -14,7 +14,7 @@ public:
 
     void dessine(Contenu const& a_dessiner) override;
 private:
-    Camera3D camera = { 0 };
+    Camera3D camera;
 
     /*
      * Pour simplifier le code, on utilise une liste de Contenu.

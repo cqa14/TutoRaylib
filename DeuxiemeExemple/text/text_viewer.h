@@ -9,7 +9,7 @@ public:
      * On crée un support à dessin qui va écrire dans le flot passé en paramètre,
      * par exemple std::cout.
      */
-    explicit TextViewer(std::ostream& flot) : flot(flot) {}
+    explicit TextViewer(std::ostream& flot_) : flot(flot_) {}
 
     ~TextViewer() override = default;
     TextViewer(TextViewer const&) = delete;

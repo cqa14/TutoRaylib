@@ -104,32 +104,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(raygui)
 ```
 
-
-TODO: déplacer plus loin et faire le lien
-
-
-On présente maintenant la configuration pour le quatrième et le sixième exemple, car ils présentent chacun des particularités utiles à savoir. Le quatrième exemple utilise aussi raygui en plus de raylib ; et le sixième exemple utilise un modèle 3D, ce qui nécessite de copier ce modèle pour le rendre accessible au programme.
-
-
-
-
-
-On procède de façon similaire pour le sixième exemple. On ajoute juste une ligne supplémentaire pour copier le modèle 3D dans le dossier de sortie (`${CMAKE_BINARY_DIR}/bin` configuré au tout début de cette section), afin qu'il soit accessible au programme final.
-
-```cmake
-# SixiemeExemple/raylib/CMakeLists.txt
-
-add_library(Ex6RayRender raylib_render.h raylib_render.cpp)
-target_compile_options(Ex6RayRender PRIVATE ${PROJECT_WARNING_FLAGS})
-target_link_libraries(Ex6RayRender raylib Ex6Dessin)
-file(COPY ${PROJECT_SOURCE_DIR}/SixiemeExemple/monkey.glb DESTINATION ${CMAKE_BINARY_DIR}/bin/ressources)
-
-add_executable(Exemple6 main_raylib.cpp)
-target_compile_options(Exemple6 PRIVATE ${PROJECT_WARNING_FLAGS})
-target_link_libraries(Exemple6 Ex6RayRender)
-```
-
-
 ---
 
 ## Premier exemple : prise en main
@@ -768,7 +742,7 @@ Comme dans le premier exemple, on a notre boucle d'exécution où l'on remet un 
 ```c++
 void raylibRender::dessine(Contenu const& a_dessiner)
 {
-    Vector3 position = { 0.0f, 1.0f, 0.0f };
+    constexpr Vector3 position({ 0.0f, 1.0f, 0.0f });
     DrawCube(position, 2.0f, 2.0f, 2.0f, LIME);
     DrawCubeWires(position, 2.0f, 2.0f, 2.0f, DARKGREEN);
 }
@@ -1279,7 +1253,7 @@ Par ailleurs, il faut aussi modifier la méthode `dessine()` pour prendre en com
 #include <rlgl.h>
 // ...
 void raylibRender::dessine(Contenu const& a_dessiner) {
-    Vector3 position = { 0.0f, 1.0f, 0.0f };
+    constexpr Vector3 position({ 0.0f, 1.0f, 0.0f });
 
     rlPushMatrix();
     rlRotatef(static_cast<float>(a_dessiner.get_angle()), 0.0f, 1.0f, 0.0f);
@@ -1300,12 +1274,12 @@ Après compilation, on devrait alors avoir un cube qui tourne :
 
 ## Sixième exemple : ajout d'objets plus complexes
 
-Comme pour l'exemple précédent, nous allons repartir de l'exemple 2. Le but de cet exemple est de montrer comment ajouter un modèle 3D plus complexe, que ce soit fait via un logiciel de modélisation 3D ou en utilisant un modèle déjà existant.
+Comme pour l'exemple précédent, nous allons repartir de l'exemple 2. Le but de cet exemple est de montrer comment ajouter un modèle 3D plus complexe, que ce soit fait via un logiciel de modélisation 3D ou en utilisant un modèle déjà existant.
 
 > Dans notre cas, nous avons juste utilisé un modèle par défaut de [Blender](https://www.blender.org/) que l'on a texturé (il existe de nombreuses ressources en ligne pour apprendre ce logiciel si la curiosité vous y pousse, tel que ce [tutoriel](https://www.youtube.com/watch?v=B0J27sf9N1Y&list=PLjEaoINr3zgEPv5y--4MKpciLaoQYZB1Z)).
 > ![ex6_blender.png](SixiemeExemple/ex6_blender.png)
 
-Pour commencer, nous allons ajouter à notre classe `raylibRender` un attribut pour le modèle 3D que nous allons charger :
+Pour commencer, nous allons ajouter à notre classe `raylibRender` un attribut pour le modèle 3D que nous allons charger :
 
 ```c++
 // ...
@@ -1313,7 +1287,7 @@ class raylibRender : public SupportADessin {
     // ...
 private:
     // ...
-    Model myModel{};
+    Model myModel;
 };
 ```
 
@@ -1322,7 +1296,8 @@ Puis pour pouvoir utiliser ce modèle, nous devons le charger dans le constructe
 ```c++
 raylibRender::raylibRender() {
     // ...
-    myModel = LoadModel("ressources/monkey.glb");
+    myModel = LoadModel(TextFormat("%sresources/monkey.glb", GetApplicationDirectory()));
+    SetTargetFPS(60);
 }
 
 raylibRender::~raylibRender() {
@@ -1331,19 +1306,63 @@ raylibRender::~raylibRender() {
 }
 ```
 
-> Si le modèle n'est pas à l'endroit, on peut utiliser :
+> Pour voir le modèle de face au lieu de coté, vous pouvez changer la position de départ de la caméra :
+> ```c++
+>      camera.position = { 0.0f, 2.0f, 5.0f };
 > ```
->  myModel.transform = MatrixRotateXYZ((Vector3){DEG2RAD * AngleX, DEG2RAD * AngleY, DEG2RAD * AngleZ});
+> au lieu de
+> ```c++
+>      camera.position = { 5.0f, 5.0f, 5.0f };
 > ```
+>
+> Si vous souhaitez tourner le modèle lui-même, utiliser :
+> ```c++
+>  myModel.transform = MatrixRotateXYZ({DEG2RAD * AngleX, DEG2RAD * AngleY, DEG2RAD * AngleZ});
+> ```
+> (avec `Angle?` les angles que vous voulez, en degrés).
 
-Le chemin `ressources/monkey.glb` est celui que l'on a paramétré dans le CMake (voir [Installation et compilation](#installation-et-compilation)).
+Le fichier `monkey.glb` est à télécharger [ici](SixiemeExemple/monkey.glb) et à mettre dans le sous-dossier `SixiemeExemple` :
 
-Pour le dessiner, il suffit d'utiliser la méthode `DrawModel()` de raylib, qui prend en paramètre le modèle à dessiner, sa position, sa taille et sa couleur en cas d'absence de texture :
+```
+SixiemeExemple/
+├── CMakeLists.txt
+├── general
+│   ├── CMakeLists.txt
+│   ├── contenu.h
+│   ├── dessinable.h
+│   └── support_a_dessin.h
+├── monkey.glb
+└── raylib
+    ├── CMakeLists.txt
+    ├── main_raylib.cpp
+    ├── raylib_render.cpp
+    └── raylib_render.h
+```
+
+Le chemin `resources/monkey.glb` est a paramétrer dans le `CMakeLists.txt` de `SixiemeExemple/raylib` :
+```cmake
+# SixiemeExemple/raylib/CMakeLists.txt
+
+add_library(RayRender6 raylib_render.h raylib_render.cpp)
+target_compile_options(RayRender6 PRIVATE ${PROJECT_WARNING_FLAGS}
+  -Wno-unused-parameter)
+target_link_libraries(RayRender6 raylib Dessin6)
+file(COPY ${PROJECT_SOURCE_DIR}/SixiemeExemple/monkey.glb DESTINATION ${CMAKE_BINARY_DIR}/bin/resources)
+
+add_executable(exemple6 main_raylib.cpp)
+target_compile_options(exemple6 PRIVATE ${PROJECT_WARNING_FLAGS})
+target_link_libraries(exemple6 RayRender6)
+```
+
+Cette ligne supplémentaire permet de copier le modèle 3D dans le dossier désiré (`${CMAKE_BINARY_DIR}/bin/resources`) afin qu'il soit accessible au programme exécutable final.
+
+
+Pour dessiner le modèle 3D, il suffit d'utiliser la méthode `DrawModel()` de raylib, qui prend en paramètre le modèle à dessiner, sa position, sa taille et sa couleur en cas d'absence de texture :
 
 ```c++
 void raylibRender::dessine(Contenu const& a_dessiner) {
-    Vector3 modelPosition = { 0.0f, 1.0f, 0.0f };
-    DrawModel(myModel, modelPosition, 1.0f, WHITE);
+    constexpr Vector3 position({ 0.0f, 1.0f, 0.0f });
+    DrawModel(myModel, position, 1.0f, WHITE);
 }
 ```
 

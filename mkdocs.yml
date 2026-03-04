@@ -132,7 +132,7 @@ markdown_extensions:
 
 # Page tree
 nav:
-  - Tuto Raylib: index.md
+  - Tuto raylib: index.md
   - Installation et compilation:
       - install_comp/inst.md
   - Exemples:

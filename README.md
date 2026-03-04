@@ -1,5 +1,7 @@
 (c) 2025 by Romain Blondel; licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). Version 1.0 26.04.02
 
+> Ce tuto est accessible sur la page suivante : [https://cqa14.github.io/TutoRaylib/](https://cqa14.github.io/TutoRaylib/). Les futurs ajouts seront fait sur la page web uniquement.
+
 # Tuto raylib
 
 ## Introduction

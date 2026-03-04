@@ -29,7 +29,7 @@ plt.show()
 
 afin de produire un graphique comme suit via le module [`matplotlib`](https://matplotlib.org/) de Python :
 
-![mpl.png](mpl.png)
+![mpl.png](assets/mpl.png)
 
 Il existe aussi des outils d'animation pour de la vulgarisation qui se basent sur de la programmation telle que [manim](https://docs.manim.community/en/stable/), créé par Grant Sanderson, le créateur de la chaîne YouTube [3Blue1Brown](https://www.youtube.com/@3blue1brown).
 
@@ -64,7 +64,7 @@ class FollowingGraphCamera(MovingCameraScene):
 
 produisant une animation comme suit :
 
-![manim.gif](manim.gif)
+![manim.gif](assets/manim.gif)
 
 On trouve des similarités entre chacun de ces outils, avec par exemple quels concepts permettent quelles configurations, comment structurer un code quand on a une idée graphique en tête, etc.
 

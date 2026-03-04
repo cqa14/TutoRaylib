@@ -76,8 +76,6 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/cqa14/
-    - icon: fontawesome/right-to-bracket
-      link: https://www.raylib.com/
 
 # Extensions
 markdown_extensions:
@@ -133,10 +131,10 @@ nav:
   - Installation et compilation:
       - install_comp/inst.md
   - Exemples:
-      - 1. Prise en main: examples/1.md
-      - 2. Modularisation et dessin 3D: examples/2.md
-      - 3. Dessin de plusieurs objets et mouvements de caméra: examples/3.md
-      - 4. Interactivité (souris, clavier, boutons, ...): examples/4.md
-      - 5. Évolution en temps réel: examples/5.md
-      - 6. Ajout d'objets plus complexes: examples/6.md
+      - 1. Prise en main: exemples/1.md
+      - 2. Modularisation et dessin 3D: exemples/2.md
+      - 3. Dessin de plusieurs objets et mouvements de caméra: exemples/3.md
+      - 4. Interactivité (souris, clavier, boutons, ...): exemples/4.md
+      - 5. Évolution en temps réel: exemples/5.md
+      - 6. Ajout d'objets plus complexes: exemples/6.md
   - Conclusion: conclusion.md

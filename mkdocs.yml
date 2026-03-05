@@ -135,6 +135,7 @@ nav:
   - Tuto Raylib: index.md
   - Installation et compilation:
       - install_comp/inst.md
+      - Configuration d'éditeurs de code: install_comp/config.md
   - Exemples:
       - 1. Prise en main: exemples/1.md
       - 2. Modularisation et dessin 3D: exemples/2.md

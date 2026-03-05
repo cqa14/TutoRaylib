@@ -62,10 +62,10 @@ En remplaçant `exemple1` par le nom de l'exécutable généré par CMake. La co
 
 ![geany_usage.png](../assets/ide/geany_usage.png)
 
-## Qt Creator
+## Qt Creator, CLion
 
-![perfect.png](../assets/ide/qt_creator.png)
+Ces deux éditeurs ont une excellente intégration native de CMake, et il suffit généralement d'ouvrir le projet CMake pour que les fichiers de build soient générés automatiquement. Il est ensuite possible de configurer les configurations de build et d'exécution directement dans l'interface de l'éditeur, en sélectionnant les cibles à compiler et à exécuter.
 
-## CLion
-
-![perfect.png](../assets/ide/clion.png)
+| Qt Creator                                      | CLion                                 |
+|-------------------------------------------------|---------------------------------------|
+| ![qt_creator.png](../assets/ide/qt_creator.png) | ![clion.png](../assets/ide/clion.png) |

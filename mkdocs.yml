@@ -10,7 +10,7 @@ repo_name: cqa14/TutoRaylib
 repo_url: https://github.com/cqa14/TutoRaylib
 
 # Copyright
-copyright: Copyright &copy; 2025 Romain Blondel
+copyright: Copyright &copy; 2025 Romain Blondel — Version 2.0 26.03.05
 
 # Configuration
 theme:

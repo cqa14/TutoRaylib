@@ -1,5 +1,5 @@
 add_library(Ex4RayRender raylib_render.h raylib_render.cpp)
-target_include_directories(Ex4RayRender PRIVATE ${raygui_SOURCE_DIR}/src)
+target_include_directories(Ex4RayRender SYSTEM PRIVATE ${raygui_SOURCE_DIR}/src)
 target_compile_options(Ex4RayRender PRIVATE -Wno-enum-compare)
 target_link_libraries(Ex4RayRender raylib Ex4Dessin)
 

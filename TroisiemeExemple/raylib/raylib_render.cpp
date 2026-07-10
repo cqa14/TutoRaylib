@@ -18,7 +18,7 @@ RaylibRender::~RaylibRender() {
 }
 
 void RaylibRender::run() {
-    while (!WindowShouldClose()) {
+    while (not WindowShouldClose()) {
         /*
          * Si l'on veut faire bouger la caméra, on peut utiliser
          * un des preset de raylib.

@@ -32,7 +32,7 @@ int main()
     SetTargetFPS(60);
 
     //Boucle principale
-    while (!WindowShouldClose())
+    while (not WindowShouldClose())
     {
         /*
          * Récupération de la largeur et de la hauteur de la fenêtre

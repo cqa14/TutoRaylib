@@ -23,10 +23,10 @@ RaylibRender::~RaylibRender() {
 }
 
 void RaylibRender::run() {
-    while (!WindowShouldClose()) {
+    while (not WindowShouldClose()) {
         // Si on appuie sur `L`, on active ou désactive le mouvement de la caméra.
         if (IsKeyPressed(KEY_L))
-            deplacement = !deplacement;
+            deplacement = not deplacement;
 
         // Cela reflète le changement suggéré ci-dessus.
         if (deplacement)

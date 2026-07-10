@@ -23,7 +23,7 @@ RaylibRender::~RaylibRender() {
 }
 
 void RaylibRender::run() {
-    while (!WindowShouldClose()) {
+    while (not WindowShouldClose()) {
         BeginDrawing();
             ClearBackground(RAYWHITE);
             BeginMode3D(camera);

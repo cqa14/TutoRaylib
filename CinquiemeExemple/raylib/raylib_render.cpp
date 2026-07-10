@@ -19,7 +19,7 @@ RaylibRender::~RaylibRender() {
 }
 
 void RaylibRender::run() {
-    while (!WindowShouldClose()) {
+    while (not WindowShouldClose()) {
         /*
          * On récupère le temps écoulé depuis la dernière frame
          * et on l'utilise pour faire évoluer le contenu

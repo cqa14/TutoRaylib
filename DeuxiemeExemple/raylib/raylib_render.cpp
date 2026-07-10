@@ -35,7 +35,7 @@ void RaylibRender::run() {
      * Méthode principale de la classe pour dessiner
      * la fenêtre.
      */
-    while (!WindowShouldClose()) {
+    while (not WindowShouldClose()) {
         BeginDrawing();
             ClearBackground(RAYWHITE);
 

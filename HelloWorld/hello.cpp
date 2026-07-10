@@ -16,7 +16,7 @@ int main() {
     SetTargetFPS(60);
 
     // Main game loop
-    while (!WindowShouldClose()) {
+    while (not WindowShouldClose()) {
         // Update
         if (GuiButton((Rectangle){ 350, 200, 100, 50 }, "Press Me")) {
             showMessage = true;

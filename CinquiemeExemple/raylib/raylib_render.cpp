@@ -18,24 +18,24 @@ RaylibRender::~RaylibRender() {
     CloseWindow();
 }
 
-void RaylibRender::run() {
-    while (not WindowShouldClose()) {
-        /*
-         * On récupère le temps écoulé depuis la dernière frame
-         * et on l'utilise pour faire évoluer le contenu
-         */
-        const auto dt = GetFrameTime();
-        c.evolue(dt);
+bool RaylibRender::should_close() const {
+    return WindowShouldClose();
+}
 
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
-            BeginMode3D(camera);
-                DrawGrid(200, 0.5f);
+double RaylibRender::frame_time() const {
+    return GetFrameTime();
+}
 
-                c.dessine_sur(*this);
-            EndMode3D();
-        EndDrawing();
-    }
+void RaylibRender::begin_frame() {
+    BeginDrawing();
+        ClearBackground(RAYWHITE);
+        BeginMode3D(camera);
+            DrawGrid(200, 0.5f);
+}
+
+void RaylibRender::end_frame() {
+        EndMode3D();
+    EndDrawing();
 }
 
 void RaylibRender::dessine(Contenu const& a_dessiner) {

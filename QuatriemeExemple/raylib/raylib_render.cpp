@@ -22,44 +22,45 @@ RaylibRender::~RaylibRender() {
     CloseWindow();
 }
 
-void RaylibRender::run() {
-    while (not WindowShouldClose()) {
-        // Si on appuie sur `L`, on active ou désactive le mouvement de la caméra.
-        if (IsKeyPressed(KEY_L))
-            deplacement = not deplacement;
+bool RaylibRender::should_close() const {
+    return WindowShouldClose();
+}
 
-        // Cela reflète le changement suggéré ci-dessus.
-        if (deplacement)
-            UpdateCamera(&camera, CAMERA_FREE);
+void RaylibRender::begin_frame() {
+    // Si on appuie sur `L`, on active ou désactive le mouvement de la caméra.
+    if (IsKeyPressed(KEY_L))
+        deplacement = not deplacement;
 
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
-            BeginMode3D(camera);
-                // On dessine chaque Contenu de la liste.
-                for (auto const& contenu : liste_contenus) {
-                    contenu.dessine_sur(*this);
-                }
-            EndMode3D();
+    // Cela reflète le changement suggéré ci-dessus.
+    if (deplacement)
+        UpdateCamera(&camera, CAMERA_FREE);
 
-            /*
-             * On peut toujours dessiner par dessus le mode 3D en 2D, il suffit de l'écrire
-             * hors du BeginMode3D et EndMode3D.
-             */
-            DrawText("Appuyez sur 'L' pour activer/désactiver le mouvement de la caméra", 10, 10, 20, DARKGRAY);
-            DrawText((std::string("Caméra ") + (deplacement ? "libre" : "fixe")).c_str(), 10, 40, 20, DARKGRAY);
+    BeginDrawing();
+        ClearBackground(RAYWHITE);
+        BeginMode3D(camera);
+}
 
-            /*
-             * Nous utilisons un toggle pour activer ou désactiver le pointeur.
-             * C'est un composant venant de raygui.
-             */
-            GuiToggle(Rectangle(10, 560, 60, 30), "Pointeur", &pointeur);
-            // Si le pointeur est activé, on dessine un cercle à la position de la souris.
-            if (pointeur) {
-                auto [x, y] = GetMousePosition();
-                DrawCircle(static_cast<int>(x), static_cast<int>(y), 10.0f, RED);
-            }
-        EndDrawing();
-    }
+void RaylibRender::end_frame() {
+        EndMode3D();
+
+        /*
+         * On peut toujours dessiner par dessus le mode 3D en 2D, il suffit de l'écrire
+         * hors du BeginMode3D et EndMode3D.
+         */
+        DrawText("Appuyez sur 'L' pour activer/désactiver le mouvement de la caméra", 10, 10, 20, DARKGRAY);
+        DrawText((std::string("Caméra ") + (deplacement ? "libre" : "fixe")).c_str(), 10, 40, 20, DARKGRAY);
+
+        /*
+         * Nous utilisons un toggle pour activer ou désactiver le pointeur.
+         * C'est un composant venant de raygui.
+         */
+        GuiToggle(Rectangle(10, 560, 60, 30), "Pointeur", &pointeur);
+        // Si le pointeur est activé, on dessine un cercle à la position de la souris.
+        if (pointeur) {
+            auto [x, y] = GetMousePosition();
+            DrawCircle(static_cast<int>(x), static_cast<int>(y), 10.0f, RED);
+        }
+    EndDrawing();
 }
 
 void RaylibRender::dessine(Contenu const& a_dessiner) {

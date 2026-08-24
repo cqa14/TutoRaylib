@@ -1,12 +1,21 @@
 #include "raylib_render.h"
+#include "contenu.h"
+#include <vector>
 
 int main()
 {
-    /*
-     * Le dessin étant fait dans la méthode run de la classe RaylibRender,
-     * il suffit d'instancier un objet de cette classe puis d'appeler cette
-     * méthode pour lancer la boucle de dessin.
-     */
     RaylibRender ecran;
-    ecran.run();
+    std::vector<Contenu> liste_contenus = {
+        Contenu(),
+        Contenu({-1,1,1}, VERT),
+        Contenu({-1,0,1}, ROUGE),
+    };
+
+    while (not ecran.should_close()) {
+        ecran.begin_frame();
+        for (auto const& contenu : liste_contenus) {
+            contenu.dessine_sur(ecran);
+        }
+        ecran.end_frame();
+    }
 }

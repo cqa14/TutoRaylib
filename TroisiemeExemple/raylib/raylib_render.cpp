@@ -17,26 +17,27 @@ RaylibRender::~RaylibRender() {
     CloseWindow();
 }
 
-void RaylibRender::run() {
-    while (not WindowShouldClose()) {
-        /*
-         * Si l'on veut faire bouger la caméra, on peut utiliser
-         * un des preset de raylib.
-         *
-         * Note : on peut aussi mettre la caméra à jour manuellement
-         * si on veut un comportement plus complexe.
-         */
-        UpdateCamera(&camera, CAMERA_FREE);
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
-            BeginMode3D(camera);
-                // On dessine chaque Contenu de la liste.
-                for (auto const& contenu : liste_contenus) {
-                    contenu.dessine_sur(*this);
-                }
-            EndMode3D();
-        EndDrawing();
-    }
+bool RaylibRender::should_close() const {
+    return WindowShouldClose();
+}
+
+void RaylibRender::begin_frame() {
+    /*
+     * Si l'on veut faire bouger la caméra, on peut utiliser
+     * un des preset de raylib.
+     *
+     * Note : on peut aussi mettre la caméra à jour manuellement
+     * si on veut un comportement plus complexe.
+     */
+    UpdateCamera(&camera, CAMERA_FREE);
+    BeginDrawing();
+        ClearBackground(RAYWHITE);
+        BeginMode3D(camera);
+}
+
+void RaylibRender::end_frame() {
+        EndMode3D();
+    EndDrawing();
 }
 
 void RaylibRender::dessine(Contenu const& a_dessiner) {

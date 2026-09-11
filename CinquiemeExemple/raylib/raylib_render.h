@@ -6,14 +6,10 @@
 
 class RaylibRender final : public SupportADessin {
 public:
-    RaylibRender();
+    RaylibRender(Contenu& a_dessiner);
     ~RaylibRender() override;
-
-    void run();
 
     void dessine(Contenu const& a_dessiner) override;
 private:
     Camera3D camera;
-
-    Contenu c;
 };

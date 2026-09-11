@@ -1,7 +1,7 @@
 #include "raylib_render.h"
 #include <rlgl.h>
 
-RaylibRender::RaylibRender() {
+RaylibRender::RaylibRender(Contenu& c) {
     SetConfigFlags(FLAG_WINDOW_HIGHDPI);
     InitWindow(800, 600, "Toupie");
 
@@ -12,13 +12,7 @@ RaylibRender::RaylibRender() {
     camera.projection = CAMERA_PERSPECTIVE;
 
     SetTargetFPS(60);
-}
 
-RaylibRender::~RaylibRender() {
-    CloseWindow();
-}
-
-void RaylibRender::run() {
     while (not WindowShouldClose()) {
         /*
          * On récupère le temps écoulé depuis la dernière frame
@@ -36,6 +30,10 @@ void RaylibRender::run() {
             EndMode3D();
         EndDrawing();
     }
+}
+
+RaylibRender::~RaylibRender() {
+    CloseWindow();
 }
 
 void RaylibRender::dessine(Contenu const& a_dessiner) {

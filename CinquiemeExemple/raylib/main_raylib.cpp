@@ -2,6 +2,6 @@
 
 int main()
 {
-    RaylibRender ecran;
-    ecran.run();
+    Contenu modele;
+    RaylibRender ecran(modele);
 }

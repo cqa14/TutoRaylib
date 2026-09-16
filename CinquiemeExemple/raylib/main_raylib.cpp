@@ -6,16 +6,12 @@ int main()
     RaylibRender ecran;
     Contenu c;
 
-    while (not ecran.should_close()) {
+    while (ecran.actif()) {
         /*
          * On récupère le temps écoulé depuis la dernière frame
          * et on l'utilise pour faire évoluer le contenu.
          */
-        const auto dt = ecran.frame_time();
-        c.evolue(dt);
-
-        ecran.begin_frame();
+        c.evolue( ecran.temps() );
         c.dessine_sur(ecran);
-        ecran.end_frame();
     }
 }

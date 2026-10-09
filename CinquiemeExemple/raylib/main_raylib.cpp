@@ -11,7 +11,7 @@ int main()
          * On récupère le temps écoulé depuis la dernière frame
          * et on l'utilise pour faire évoluer le contenu.
          */
-        c.evolue( ecran.temps() );
+        c.evolue(ecran.temps());
         c.dessine_sur(ecran);
     }
 }

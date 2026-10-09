@@ -11,11 +11,9 @@ int main()
         Contenu({-1,0,1}, ROUGE),
     };
 
-    while (not ecran.should_close()) {
-        ecran.begin_frame();
+    while (ecran.actif()) {
         for (auto const& contenu : liste_contenus) {
             contenu.dessine_sur(ecran);
         }
-        ecran.end_frame();
     }
 }

@@ -22,8 +22,10 @@ RaylibRender::~RaylibRender() {
     CloseWindow();
 }
 
-bool RaylibRender::should_close() const {
-    return WindowShouldClose();
+bool RaylibRender::actif() {
+    end_frame();
+    begin_frame();
+    return not WindowShouldClose();
 }
 
 void RaylibRender::begin_frame() {
@@ -60,6 +62,7 @@ void RaylibRender::end_frame() {
             auto [x, y] = GetMousePosition();
             DrawCircle(static_cast<int>(x), static_cast<int>(y), 10.0f, RED);
         }
+
     EndDrawing();
 }
 

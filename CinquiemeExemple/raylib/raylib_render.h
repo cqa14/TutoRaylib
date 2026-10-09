@@ -11,7 +11,7 @@ public:
 
     void dessine(Contenu const& a_dessiner) override;
 
-    bool actif() const;  // l'écran est-il toujours actif ?
+    bool actif();  // l'écran est-il toujours actif ?
 
     double temps() const; // temps écoulé depuis la dernière frame
 

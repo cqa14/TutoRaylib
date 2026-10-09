@@ -18,7 +18,9 @@ RaylibRender::~RaylibRender() {
     CloseWindow();
 }
 
-bool RaylibRender::actif() const {
+bool RaylibRender::actif() {
+    end_frame();
+    begin_frame();
     return not WindowShouldClose();
 }
 
@@ -39,8 +41,6 @@ void RaylibRender::end_frame() {
 }
 
 void RaylibRender::dessine(Contenu const& a_dessiner) {
-    begin_frame();
-  
     constexpr Vector3 cubePosition = { 0.0f, 1.0f, 0.0f };
     /*
      *  Pour faire pivoter le cube, on utilise les outils de rlgl
@@ -59,6 +59,4 @@ void RaylibRender::dessine(Contenu const& a_dessiner) {
 
     // Et on enlève la transformation
     rlPopMatrix();
-    
-    end_frame();
 }

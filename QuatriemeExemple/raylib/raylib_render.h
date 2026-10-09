@@ -8,13 +8,14 @@ public:
     RaylibRender();
     ~RaylibRender() override;
 
-    bool should_close() const;
-    void begin_frame();
-    void end_frame();
+    bool actif();
 
     void dessine(Contenu const& a_dessiner) override;
 private:
     Camera3D camera;
+
+    void begin_frame();
+    void end_frame();
 
     // Ces variables sont utilisées pour les états des événements que l'on va implémenter.
     bool deplacement = false;

@@ -9,13 +9,14 @@ public:
     RaylibRender();
     ~RaylibRender() override;
 
-    bool should_close() const;
-    void begin_frame();
-    void end_frame();
+    bool actif();
 
     void dessine(Contenu const& a_dessiner) override;
 private:
     Camera3D camera;
+    void begin_frame();
+    void end_frame();
+
     // On stocke les modèles que l'on voudra dessiner
     Model myModel{};
 };

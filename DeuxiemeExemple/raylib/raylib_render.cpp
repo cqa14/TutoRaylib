@@ -30,8 +30,14 @@ RaylibRender::~RaylibRender() {
     CloseWindow();
 }
 
-bool RaylibRender::should_close() const {
-    return WindowShouldClose();
+bool RaylibRender::actif() {
+    /*
+     * Pour simplifier le main, dans la vérification de l'état de la fenêtre, on va finir le dessin de la frame
+     * précédente et commencer la nouvelle en même temps.
+     */
+    end_frame();
+    begin_frame();
+    return not WindowShouldClose();
 }
 
 void RaylibRender::begin_frame() {

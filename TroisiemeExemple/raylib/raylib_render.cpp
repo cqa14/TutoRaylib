@@ -17,8 +17,10 @@ RaylibRender::~RaylibRender() {
     CloseWindow();
 }
 
-bool RaylibRender::should_close() const {
-    return WindowShouldClose();
+bool RaylibRender::actif() {
+    end_frame();
+    begin_frame();
+    return not WindowShouldClose();
 }
 
 void RaylibRender::begin_frame() {

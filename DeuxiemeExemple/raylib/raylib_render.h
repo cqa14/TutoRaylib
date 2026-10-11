@@ -13,7 +13,7 @@ public:
     RaylibRender();
     ~RaylibRender() override;
 
-    void run();
+    bool actif();
 
     void dessine(Contenu const& a_dessiner) override;
 private:
@@ -22,12 +22,6 @@ private:
      */
     Camera3D camera;
 
-    /*
-     * On enregistrera dans cette architecture le contenu à dessiner
-     * immédiatement dans la classe de rendu.
-     * D'un point de vue concret, on préfèrera en général
-     * utiliser des pointeurs vers les objets dessinables afin d'éviter
-     * de faire des copies de gros objets.
-     */
-    Contenu c;
+    void begin_frame();
+    void end_frame();
 };

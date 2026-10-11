@@ -22,16 +22,22 @@ RaylibRender::~RaylibRender() {
     CloseWindow();
 }
 
-void RaylibRender::run() {
-    while (not WindowShouldClose()) {
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
-            BeginMode3D(camera);
-                DrawGrid(200, 0.5f);
-                c.dessine_sur(*this);
-            EndMode3D();
-        EndDrawing();
-    }
+bool RaylibRender::actif() {
+    end_frame();
+    begin_frame();
+    return not WindowShouldClose();
+}
+
+void RaylibRender::begin_frame() {
+    BeginDrawing();
+        ClearBackground(RAYWHITE);
+        BeginMode3D(camera);
+            DrawGrid(200, 0.5f);
+}
+
+void RaylibRender::end_frame() {
+        EndMode3D();
+    EndDrawing();
 }
 
 void RaylibRender::dessine(Contenu const& a_dessiner) {

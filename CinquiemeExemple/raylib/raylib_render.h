@@ -9,11 +9,15 @@ public:
     RaylibRender();
     ~RaylibRender() override;
 
-    void run();
-
     void dessine(Contenu const& a_dessiner) override;
+
+    bool actif();  // l'écran est-il toujours actif ?
+
+    double temps() const; // temps écoulé depuis la dernière frame
+
 private:
     Camera3D camera;
 
-    Contenu c;
+    void begin_frame();
+    void end_frame();
 };

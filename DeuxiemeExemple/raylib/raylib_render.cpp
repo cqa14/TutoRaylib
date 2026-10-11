@@ -30,25 +30,29 @@ RaylibRender::~RaylibRender() {
     CloseWindow();
 }
 
-void RaylibRender::run() {
+bool RaylibRender::actif() {
     /*
-     * Méthode principale de la classe pour dessiner
-     * la fenêtre.
+     * Pour simplifier le main, dans la vérification de l'état de la fenêtre, on va finir le dessin de la frame
+     * précédente et commencer la nouvelle en même temps.
      */
-    while (not WindowShouldClose()) {
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
+    end_frame();
+    begin_frame();
+    return not WindowShouldClose();
+}
 
-            // Pour le dessin 3D, il faut commencer par activer le mode 3D.
-            BeginMode3D(camera);
-                // Afin de bien voir le cube, on va dessiner une grille.
-                DrawGrid(200, 0.5f);
+void RaylibRender::begin_frame() {
+    BeginDrawing();
+        ClearBackground(RAYWHITE);
 
-                // Et on dessine le contenu.
-                c.dessine_sur(*this);
-            EndMode3D();
-        EndDrawing();
-    }
+        // Pour le dessin 3D, il faut commencer par activer le mode 3D.
+        BeginMode3D(camera);
+            // Afin de bien voir le cube, on va dessiner une grille.
+            DrawGrid(200, 0.5f);
+}
+
+void RaylibRender::end_frame() {
+        EndMode3D();
+    EndDrawing();
 }
 
 void RaylibRender::dessine(Contenu const& a_dessiner) {

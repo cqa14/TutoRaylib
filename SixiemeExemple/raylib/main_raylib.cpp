@@ -1,8 +1,13 @@
 #include "raylib_render.h"
+#include "contenu.h"
 
 
 int main()
 {
     RaylibRender ecran;
-    ecran.run();
+    Contenu c;
+
+    while (ecran.actif()) {
+        c.dessine_sur(ecran);
+    }
 }
